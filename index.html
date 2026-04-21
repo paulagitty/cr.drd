@@ -908,10 +908,19 @@ const sidebarHTML = `
         <div class="form-section-title">เครื่องมือสำหรับนักพัฒนา</div>
         <p style="font-size: 13px; color: var(--gray-700); margin-bottom: 1rem;">
           ปุ่มด้านล่างนี้จะทำการสร้างเรื่องร้องเรียนจำลองจำนวน 20 เคส เข้าสู่ฐานข้อมูล Firebase ของคุณอัตโนมัติ <br>
-          <strong style="color:var(--green)">* เวอร์ชันนี้: ข้อมูลจำลองจะถูกสร้างให้มี "ประวัติย้อนหลัง (Timeline)" ครบทุกขั้นตอนเพื่อทดสอบการพิมพ์เอกสาร</strong>
+          <strong style="color:var(--green)">* เวอร์ชันนี้: ข้อมูลจำลองจะถูกสร้างให้มี "ประวัติย้อนหลัง (Timeline)" ครบทุกขั้นตอนเพื่อทดสอบการพิมพ์เอกสารอย่างสมจริง</strong>
         </p>
         <button id="btn-gen-mock" class="btn-save" style="background: var(--orange);" onclick="generateMockData()">
-          ⚡ สร้างข้อมูลจำลอง 20 เคส (พร้อมประวัติ)
+          ⚡ สร้างข้อมูลจำลอง 20 เคส (พร้อมประวัติแบบละเอียด)
+        </button>
+        
+        <!-- เพิ่มปุ่มล้างข้อมูลทั้งหมด -->
+        <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
+        <p style="font-size: 13px; color: var(--gray-700); margin-bottom: 1rem;">
+          หากมีข้อมูลขยะค้างอยู่ในระบบจำนวนมาก คุณสามารถกดปุ่มด้านล่างนี้เพื่อล้างข้อมูลทั้งหมดในฐานข้อมูลทิ้งได้ทันที
+        </p>
+        <button id="btn-clear-db" class="btn-cancel" style="color: var(--red); border-color: var(--red-light); background: var(--red-light);" onclick="clearAllData()">
+          🗑️ ลบข้อมูลทั้งหมดในระบบ (Reset Database)
         </button>
       </div>
     </main>
@@ -1267,7 +1276,7 @@ window.updateCaseDetails = async () => {
     }
 };
 
-/* ─── 6. ระบบแอดมิน - ลบข้อมูล (Delete) ─── */
+/* ─── 6. ระบบแอดมิน - ลบข้อมูลเคส (Delete Case) ─── */
 window.openConfirmDelete = () => { document.getElementById('confirm-modal').classList.add('show'); };
 window.closeConfirmDelete = () => { document.getElementById('confirm-modal').classList.remove('show'); };
 window.executeDelete = async () => {
@@ -1290,7 +1299,34 @@ window.executeDelete = async () => {
     }
 };
 
-/* ─── 7. สร้างข้อมูลจำลองแบบมี History ครบทุกขั้นตอน (Mock Data) ─── */
+/* ─── 7. ระบบแอดมิน - ลบข้อมูลทั้งหมด (RESET DB) ─── */
+window.clearAllData = async () => {
+    if (!currentUser) return window.showToast("ระบบยังไม่พร้อม");
+    const confirmReset = confirm("คำเตือน: ยืนยันการลบข้อมูลเรื่องร้องเรียน 'ทั้งหมด' ในระบบ?\n\nข้อมูลที่ถูกลบจะไม่สามารถกู้คืนได้ (เหมาะสำหรับล้างข้อมูลจำลองทิ้งก่อนเริ่มใช้งานจริง)");
+    if (!confirmReset) return;
+
+    const btn = document.getElementById('btn-clear-db');
+    btn.disabled = true; btn.textContent = "กำลังล้างข้อมูลทั้งหมด...";
+
+    try {
+        // ดึงข้อมูลทั้งหมดมาลบทีละอัน
+        const querySnapshot = await getDocs(complaintsRef);
+        const deletePromises = [];
+        querySnapshot.forEach((docSnap) => {
+            deletePromises.push(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'complaints', docSnap.id)));
+        });
+        
+        await Promise.all(deletePromises);
+        window.showToast("ลบข้อมูลทั้งหมดในระบบเรียบร้อยแล้ว");
+    } catch (error) {
+        console.error("Clear DB Error:", error);
+        window.showToast("เกิดข้อผิดพลาดในการล้างข้อมูล");
+    } finally {
+        btn.disabled = false; btn.innerHTML = "🗑️ ลบข้อมูลทั้งหมดในระบบ (Reset Database)";
+    }
+};
+
+/* ─── 8. สร้างข้อมูลจำลองแบบมี History ครบทุกขั้นตอนอย่างละเอียด ─── */
 window.generateMockData = async () => {
     if (!currentUser) return window.showToast("กรุณารอระบบเชื่อมต่อสักครู่");
     const btn = document.getElementById('btn-gen-mock');
@@ -1316,7 +1352,7 @@ window.generateMockData = async () => {
             const pastDate = new Date();
             pastDate.setDate(pastDate.getDate() - Math.floor(Math.random() * 60));
 
-            // สร้าง History ตั้งแต่ขั้นตอนที่ 1 ไปจนถึง finalStep เรียงตามลำดับเวลา
+            // สร้าง History ตั้งแต่ขั้นตอนที่ 1 ไปจนถึง finalStep โดยจำลองข้อความที่สมจริงมากๆ
             let mockHistory = [];
             let currDate = new Date(pastDate);
 
@@ -1324,11 +1360,11 @@ window.generateMockData = async () => {
                 let noteStr = "";
                 let officer = (s === 1) ? "แอดมินระบบ" : (assigneeName || "เจ้าหน้าที่");
                 
-                if (s === 1) noteStr = "รับเรื่องร้องเรียนผ่านระบบออนไลน์ พร้อมตรวจสอบเอกสารประกอบคำร้องเบื้องต้น";
-                else if (s === 2) noteStr = "ลงพื้นที่ตรวจสอบข้อเท็จจริงเบื้องต้น สอบถามพยานแวดล้อมและรวบรวมหลักฐานเพิ่มเติม";
-                else if (s === 3) noteStr = "ส่งหนังสือเชิญคู่กรณีทั้งสองฝ่ายมาเจรจาไกล่เกลี่ย ณ ศูนย์ดำรงธรรม";
-                else if (s === 4) noteStr = "แจ้งผลการพิจารณาให้ผู้ร้องทราบผ่านทางโทรศัพท์และจดหมายลงทะเบียนเรียบร้อย";
-                else if (s === 5) noteStr = "ยุติเรื่องร้องเรียน คู่กรณีตกลงกันได้และลงลายมือชื่อในบันทึกข้อตกลงเป็นที่เรียบร้อย";
+                if (s === 1) noteStr = "รับเรื่องร้องเรียนผ่านระบบออนไลน์ เจ้าหน้าที่ได้ทำการตรวจสอบเอกสารและหลักฐานประกอบคำร้องเบื้องต้น พบว่าข้อมูลครบถ้วน จึงได้รับเรื่องเข้าสู่ระบบเพื่อดำเนินการตามขั้นตอนต่อไป";
+                else if (s === 2) noteStr = "เจ้าหน้าที่ผู้รับผิดชอบได้ลงพื้นที่ตรวจสอบสถานที่เกิดเหตุ และสอบถามข้อเท็จจริงจากพยานแวดล้อม พร้อมทั้งรวบรวมพยานหลักฐานภาพถ่ายเพิ่มเติมเพื่อใช้ประกอบการพิจารณาหาแนวทางแก้ไขต่อไป";
+                else if (s === 3) noteStr = "ศูนย์ดำรงธรรมได้ออกหนังสือเรียกตัวคู่กรณี (ที่ ศธ.เชียงราย ๑๒๓๔/๒๕๖๙) เพื่อเชิญทั้งสองฝ่ายมาเจรจาไกล่เกลี่ยหาข้อยุติร่วมกัน ณ ห้องประชุมศูนย์ดำรงธรรมจังหวัดเชียงราย";
+                else if (s === 4) noteStr = "คู่กรณีทั้งสองฝ่ายได้เข้ามาร่วมเจรจาไกล่เกลี่ย ผลการเจรจาปรากฏว่าทั้งสองฝ่ายสามารถตกลงกันได้ โดยผู้ถูกร้องยินยอมที่จะดำเนินการแก้ไขปัญหาตามที่ผู้ร้องเรียกร้อง ภายใน 15 วัน เจ้าหน้าที่ได้จัดทำบันทึกข้อตกลงไว้เป็นหลักฐาน";
+                else if (s === 5) noteStr = "เจ้าหน้าที่ได้ติดตามผลการดำเนินการ พบว่าผู้ถูกร้องได้แก้ไขปัญหาตามข้อตกลงเรียบร้อยแล้ว จึงได้สรุปรายงานผลการปฏิบัติงานเสนอต่อผู้บริหาร และแจ้งผลให้ผู้ร้องทราบอย่างเป็นทางการ พร้อมดำเนินการยุติเรื่องและปิดเคส";
 
                 mockHistory.push({
                     date: currDate.toISOString(), 
@@ -1337,7 +1373,6 @@ window.generateMockData = async () => {
                     officer: officer
                 });
                 
-                // ขยับเวลาไปข้างหน้า 1-5 วันสำหรับการอัปเดตครั้งต่อไป
                 currDate.setDate(currDate.getDate() + Math.floor(Math.random() * 5) + 1);
             }
 
@@ -1345,7 +1380,7 @@ window.generateMockData = async () => {
                 code: caseCode, citizenId: cid, citizenName: mockNames[i % mockNames.length] + " (จำลอง)",
                 phone: "08" + Math.floor(Math.random()*100000000).toString().padStart(8, '0'),
                 type: mockTypes[i % mockTypes.length],
-                description: "ข้อร้องเรียนจำลองลำดับที่ " + i + " เพื่อทดสอบระบบหน้า Dashboard และการปริ้นรายงาน\n\nผู้ร้องขอความช่วยเหลือให้ติดตามการดำเนินงานของหน่วยงานที่เกี่ยวข้องอย่างใกล้ชิด",
+                description: "ข้อร้องเรียนจำลองลำดับที่ " + i + " เพื่อทดสอบระบบหน้า Dashboard และการปริ้นรายงานที่มีข้อความอธิบายยาวๆ\n\nผู้ร้องขอความช่วยเหลือให้ติดตามการดำเนินงานของหน่วยงานที่เกี่ยวข้องอย่างใกล้ชิด เนื่องจากได้รับผลกระทบเป็นเวลานาน",
                 driveLink: "", assignee: assigneeName, assigneePhone: assigneePhone,
                 urgency: Math.random() > 0.8 ? "urgent" : "normal", currentStep: finalStep,
                 history: mockHistory, status: status,
@@ -1358,11 +1393,11 @@ window.generateMockData = async () => {
         console.error("Mock Gen Error:", error);
         window.showToast("เกิดข้อผิดพลาดในการสร้างข้อมูล");
     } finally {
-        btn.disabled = false; btn.textContent = "⚡ สร้างข้อมูลจำลอง 20 เคส (พร้อมประวัติ)";
+        btn.disabled = false; btn.textContent = "⚡ สร้างข้อมูลจำลอง 20 เคส (พร้อมประวัติแบบละเอียด)";
     }
 };
 
-/* ─── 8. ระบบประชาชน - ค้นหาข้อมูล ─── */
+/* ─── 9. ระบบประชาชน - ค้นหาข้อมูล ─── */
 window.searchCase = () => {
     const cid = document.getElementById('cid-input').value.trim();
     const area = document.getElementById('result-area');
@@ -1412,7 +1447,7 @@ window.searchCase = () => {
     card.style.display = 'block';
 };
 
-/* ─── 9. เปิดหน้าต่าง Modal อัปเดตและแสดงประวัติ Timeline ─── */
+/* ─── 10. เปิดหน้าต่าง Modal อัปเดตและแสดงประวัติ Timeline ─── */
 window.openCaseDetails = (docId) => {
     const c = allComplaints.find(x => x.id === docId);
     if(!c) return window.showToast('ไม่พบข้อมูล');
@@ -1473,7 +1508,7 @@ window.closeModal = () => {
     document.getElementById('case-modal').classList.remove('show');
 };
 
-/* ─── 10. ระบบ Print เอกสาร A4 (แสดงประวัติครบทุกขั้นตอน) ─── */
+/* ─── 11. ระบบ Print เอกสาร A4 (แสดงประวัติครบทุกขั้นตอน) ─── */
 window.printCase = () => {
     const docId = document.getElementById('m-docId').value;
     const c = allComplaints.find(x => x.id === docId);
@@ -1496,7 +1531,7 @@ window.printCase = () => {
     }
 
     if (historyData.length > 0) {
-        // เรียงจากเก่าไปใหม่ (บนลงล่าง) สำหรับหน้ากระดาษ Print
+        // เรียงจากเก่าไปใหม่ (บนลงล่าง) สำหรับหน้ากระดาษ Print เพื่อให้อ่านเนื้อเรื่องปะติดปะต่อกัน
         historyData.sort((a,b) => new Date(a.date) - new Date(b.date));
         pHisList.innerHTML = historyData.map(h => {
             const hd = new Date(h.date);
