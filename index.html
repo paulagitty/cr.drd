@@ -395,6 +395,24 @@ tr:hover td { background: var(--gray-50); }
 .btn-delete:hover { background: var(--red-light); }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* Timeline History in Modal */
+.history-timeline {
+  border-left: 2px solid var(--border);
+  margin-left: 8px; padding-left: 16px;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.history-item { position: relative; }
+.history-item::before {
+  content: ''; position: absolute; left: -22px; top: 4px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--green); border: 2px solid var(--white);
+  box-shadow: 0 0 0 1px var(--green);
+}
+.hi-date { font-size: 11px; color: var(--gray-500); margin-bottom: 2px; }
+.hi-step { font-size: 12px; font-weight: 600; color: var(--gray-900); margin-bottom: 4px; }
+.hi-note { font-size: 13px; color: var(--gray-700); background: var(--gray-50); padding: 8px 12px; border-radius: var(--r-sm); margin-bottom: 4px; line-height: 1.4; white-space: pre-wrap; }
+.hi-officer { font-size: 11px; color: var(--orange); font-weight: 500; }
+
 /* Custom Confirm Modal */
 #confirm-modal .modal-content { max-width: 400px; text-align: center; padding-top: 2rem; }
 
@@ -406,6 +424,43 @@ tr:hover td { background: var(--gray-50); }
   transform: translateY(100px); opacity: 0; transition: all .3s ease;
 }
 .toast.show { transform: none; opacity: 1; }
+
+/* ─── PRINT STYLES ─── */
+@media print {
+  body * { visibility: hidden; }
+  .page, .topnav, .modal-overlay, #toast { display: none !important; }
+  
+  #print-container { 
+    display: block !important; 
+    visibility: visible; 
+    position: absolute; 
+    left: 0; top: 0; 
+    width: 100%; 
+    background: white; 
+    color: black;
+    font-family: 'Sarabun', sans-serif;
+  }
+  #print-container * { visibility: visible; }
+  
+  .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+  .print-title { font-size: 20px; font-weight: bold; }
+  .print-subtitle { font-size: 14px; color: #555; }
+  
+  .print-section { margin-bottom: 15px; }
+  .print-section-title { font-size: 14px; font-weight: bold; text-decoration: underline; margin-bottom: 8px; }
+  
+  .print-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 15px; }
+  .print-table th, .print-table td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  .print-table th { background-color: #f5f5f5; width: 130px; font-weight: bold; }
+  
+  .print-history { border-left: 2px solid #ccc; margin-left: 5px; padding-left: 15px; }
+  .print-history-item { margin-bottom: 12px; }
+  .print-hi-head { font-weight: bold; font-size: 13px; }
+  .print-hi-date { font-size: 11px; color: #666; }
+  .print-hi-note { font-size: 13px; margin-top: 4px; padding-left: 10px; border-left: 2px solid #eee; white-space: pre-wrap; }
+}
+
+#print-container { display: none; }
 </style>
 </head>
 <body>
@@ -615,13 +670,13 @@ const sidebarHTML = `
       </div>
 
       <div class="form-card">
-        <div class="form-section-title">ขั้นตอนปัจจุบัน</div>
+        <div class="form-section-title">ขั้นตอนปัจจุบัน (เริ่มต้น)</div>
         <div class="step-select-row" id="step-row">
           <!-- injected -->
         </div>
         <div style="margin-top:.75rem">
-          <label class="form-label">บันทึกเพิ่มเติม / หมายเหตุ</label>
-          <textarea id="req-note" class="form-textarea" style="min-height:56px" placeholder="บันทึกความเคลื่อนไหว เช่น วันนัด, ผลการตรวจสอบ..."></textarea>
+          <label class="form-label">บันทึกรายละเอียดการดำเนินการ (Log)</label>
+          <textarea id="req-note" class="form-textarea" style="min-height:56px" placeholder="เช่น รับเรื่องเข้าระบบ พร้อมรับเอกสารประกอบ..."></textarea>
         </div>
       </div>
 
@@ -855,6 +910,7 @@ const sidebarHTML = `
       <button class="btn-close" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
+      <!-- 1. ข้อมูลพื้นฐาน -->
       <div class="form-section-title">ข้อมูลพื้นฐาน</div>
       <div class="modal-detail-grid">
         <div class="modal-label">ผู้ร้องเรียน:</div><div class="modal-val" id="m-name"></div>
@@ -866,41 +922,48 @@ const sidebarHTML = `
       
       <div class="form-section-title" style="margin-top:1.5rem">เนื้อเรื่อง / ไฟล์แนบ</div>
       <p id="m-desc" style="font-size:13px; color:var(--gray-900); background:var(--gray-50); padding:10px; border-radius:var(--r-sm); margin-bottom:10px; line-height:1.5; white-space:pre-wrap;"></p>
-      <div id="m-drive-container">
-        <!-- ปุ่มเปิดไฟล์จะถูกใส่ที่นี่ด้วย JS -->
+      <div id="m-drive-container"></div>
+
+      <!-- 2. ประวัติการดำเนินการ (Timeline History) -->
+      <div class="form-section-title" style="margin-top:2rem">ประวัติการดำเนินการ</div>
+      <div id="m-history-list" class="history-timeline">
+        <!-- ข้อมูลประวัติการทำงานจะถูกแทรกที่นี่ -->
       </div>
       
-      <div class="form-section-title" style="margin-top:1.5rem">ส่วนสำหรับเจ้าหน้าที่ (อัปเดตข้อมูล)</div>
+      <!-- 3. ส่วนสำหรับเจ้าหน้าที่ (เพิ่มอัปเดตใหม่) -->
+      <div class="form-section-title" style="margin-top:2rem; color:var(--orange);">เพิ่มการอัปเดตความคืบหน้าใหม่</div>
+      <div style="background:var(--orange-light); padding:15px; border-radius:var(--r-md); border:1px solid rgba(200,90,30,.2);">
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">เจ้าหน้าที่ผู้รับผิดชอบ (อัปเดต)</label>
+          <input list="officers-list" id="m-assignee" class="form-input" placeholder="เลือกหรือพิมพ์ชื่อเจ้าหน้าที่...">
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">ขั้นตอนที่จะอัปเดต</label>
+          <select id="m-step" class="form-select">
+            <option value="1">1. รับเรื่อง</option>
+            <option value="2">2. ตรวจสอบเบื้องต้น</option>
+            <option value="3">3. นัดไกล่เกลี่ย</option>
+            <option value="4">4. แจ้งผล</option>
+            <option value="5">5. ปิดเรื่อง</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">บันทึกการดำเนินการ (Log)</label>
+          <textarea id="m-note" class="form-textarea" style="min-height:80px; border-color:var(--orange);" placeholder="พิมพ์รายละเอียดสิ่งที่ได้ดำเนินการไป..."></textarea>
+          <div style="font-size:11px; color:var(--gray-500); margin-top:5px;">* การบันทึกนี้จะถูกจัดเก็บเป็นประวัติ ไม่สามารถลบได้</div>
+        </div>
+      </div>
       
-      <div class="form-group" style="margin-bottom:10px;">
-        <label class="form-label">มอบหมายให้เจ้าหน้าที่</label>
-        <input list="officers-list" id="m-assignee" class="form-input" placeholder="เลือกหรือพิมพ์ชื่อเจ้าหน้าที่...">
-      </div>
-      <div class="form-group" style="margin-bottom:10px;">
-        <label class="form-label">ขั้นตอนปัจจุบัน</label>
-        <select id="m-step" class="form-select">
-          <option value="1">1. รับเรื่อง</option>
-          <option value="2">2. ตรวจสอบเบื้องต้น</option>
-          <option value="3">3. นัดไกล่เกลี่ย</option>
-          <option value="4">4. แจ้งผล</option>
-          <option value="5">5. ปิดเรื่อง</option>
-        </select>
-      </div>
-      <div class="form-group" style="margin-bottom:10px;">
-        <label class="form-label">บันทึกความเคลื่อนไหวเพิ่มเติม</label>
-        <textarea id="m-note" class="form-textarea" style="min-height:60px" placeholder="บันทึกเพิ่มเติม..."></textarea>
-      </div>
-      
-      <!-- ซ่อน ID ไว้สำหรับใช้อัปเดตฐานข้อมูล -->
       <input type="hidden" id="m-docId">
     </div>
     <div class="modal-footer">
       <div>
-        <button class="btn-delete" onclick="openConfirmDelete()">ลบข้อมูล</button>
+        <button class="btn-delete" onclick="openConfirmDelete()">ลบเคสทิ้ง</button>
       </div>
       <div style="display:flex; gap:10px;">
+        <button class="btn-cancel" onclick="printCase()">🖨️ พิมพ์เอกสาร</button>
         <button class="btn-cancel" onclick="closeModal()">ปิด</button>
-        <button class="btn-save" id="btn-update-case" onclick="updateCaseDetails()">บันทึกการเปลี่ยนแปลง</button>
+        <button class="btn-save" id="btn-update-case" onclick="updateCaseDetails()">บันทึกอัปเดตใหม่</button>
       </div>
     </div>
   </div>
@@ -921,6 +984,43 @@ const sidebarHTML = `
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════
+     PRINT CONTAINER (ซ่อนไว้สำหรับดึงไปปริ้น)
+═══════════════════════════════════════════ -->
+<div id="print-container">
+  <div class="print-header">
+    <div class="print-title">แบบบันทึกคำร้องและประวัติการดำเนินการ</div>
+    <div class="print-subtitle">ศูนย์ดำรงธรรม จังหวัดเชียงราย</div>
+  </div>
+  
+  <div class="print-section">
+    <div class="print-section-title">ข้อมูลคำร้อง</div>
+    <table class="print-table">
+      <tr>
+        <th>รหัสเรื่อง</th><td id="p-code"></td>
+        <th>วันที่รับเรื่อง</th><td id="p-date"></td>
+      </tr>
+      <tr>
+        <th>ชื่อผู้ร้องเรียน</th><td id="p-name"></td>
+        <th>เลขบัตรประชาชน</th><td id="p-cid"></td>
+      </tr>
+      <tr>
+        <th>ประเภทเรื่อง</th><td id="p-type"></td>
+        <th>เบอร์โทรศัพท์</th><td id="p-phone"></td>
+      </tr>
+    </table>
+    <div style="font-size:13px; font-weight:bold; margin-bottom:4px;">เนื้อเรื่องโดยย่อ:</div>
+    <div id="p-desc" style="font-size:13px; padding:10px; border:1px solid #ccc; white-space:pre-wrap; min-height:60px;"></div>
+  </div>
+
+  <div class="print-section" style="margin-top:20px;">
+    <div class="print-section-title">ประวัติการดำเนินการติดตามเรื่อง</div>
+    <div id="p-history-list" class="print-history">
+      <!-- ข้อมูลประวัติจะถูกแทรกที่นี่ -->
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div id="toast" class="toast"></div>
 
@@ -934,7 +1034,7 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gsta
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 /* ====================================================================
-   ตั้งค่า FIREBASE CONFIG (นำข้อมูลจากโปรเจกต์ของคุณมาวางทับส่วนนี้)
+   ตั้งค่า FIREBASE CONFIG
 ==================================================================== */
 let firebaseConfig = {
   apiKey: "AIzaSyBJfcCyRIWjjBTK0kzWq7si-3Y1YkAEG38",
@@ -960,14 +1060,14 @@ const complaintsRef = collection(db, 'artifacts', appId, 'public', 'data', 'comp
 /* ─── State & Data ─── */
 let currentUser = null;
 let allComplaints = []; 
-let isAdminLoggedIn = sessionStorage.getItem('admin_logged') === 'true'; // เช็คสถานะล็อกอินจาก Session
+let isAdminLoggedIn = sessionStorage.getItem('admin_logged') === 'true';
 
 const STEPS = [
-  { id:1, label:'รับเรื่อง', color:'#1D9E75' },
-  { id:2, label:'ตรวจสอบเบื้องต้น', color:'#1D9E75' },
-  { id:3, label:'นัดไกล่เกลี่ย', color:'#B86A00' },
-  { id:4, label:'แจ้งผล', color:'#B86A00' },
-  { id:5, label:'ปิดเรื่อง', color:'#3B6D11' }
+  { id:1, label:'รับเรื่อง' },
+  { id:2, label:'ตรวจสอบเบื้องต้น' },
+  { id:3, label:'นัดไกล่เกลี่ย' },
+  { id:4, label:'แจ้งผลการพิจารณา' },
+  { id:5, label:'ปิดเรื่อง' }
 ];
 
 let selectedStep = 1;
@@ -979,15 +1079,13 @@ const knownOfficers = {
   "นายวิชัย ประดับ (เจ้าหน้าที่)": "082-345-6789"
 };
 
-/* ─── 1. ระบบ Authentication (Firebase) ─── */
+/* ─── 1. ระบบ Authentication ─── */
 async function initAuth() {
     try {
         await signInAnonymously(auth);
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
-            if (user) {
-                setupRealtimeListener();
-            }
+            if (user) { setupRealtimeListener(); }
         });
     } catch (error) {
         console.error("Auth Error:", error);
@@ -995,22 +1093,18 @@ async function initAuth() {
     }
 }
 
-/* ─── 2. ระบบล็อกอินแอดมิน (UI Level) ─── */
+/* ─── 2. ระบบล็อกอินแอดมิน ─── */
 window.doLogin = () => {
     const user = document.getElementById('login-user').value.trim();
     const pass = document.getElementById('login-pass').value.trim();
     const errBox = document.getElementById('login-error');
     
-    // ตั้งค่ารหัสผ่านจำลองตามที่ขอ
     if (user === 'admin' && pass === 'admin123') {
         isAdminLoggedIn = true;
-        sessionStorage.setItem('admin_logged', 'true'); // จำการล็อกอินไว้ใน Session
+        sessionStorage.setItem('admin_logged', 'true');
         errBox.style.display = 'none';
-        
-        // ล้างช่องเผื่อล็อกเอาต์แล้วกลับมาใหม่
         document.getElementById('login-user').value = '';
         document.getElementById('login-pass').value = '';
-        
         window.goPage('page-dashboard', document.querySelectorAll('.sidebar-item')[1]);
         window.showToast("เข้าสู่ระบบสำเร็จ");
     } else {
@@ -1028,13 +1122,11 @@ window.doLogout = () => {
 /* ─── 3. ระบบ Real-time ─── */
 function setupRealtimeListener() {
     if (!currentUser) return;
-    
     onSnapshot(complaintsRef, (snapshot) => {
         allComplaints = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
-        
         renderPendingTable();
         renderDashboard();
         renderReports(); 
@@ -1071,10 +1163,20 @@ window.saveCase = async () => {
     if (selectedStep === 5) status = 'done';
     else if (assignee !== '') status = 'wip';
 
+    // สร้างประวัติรายการแรกตอนรับเรื่อง
+    const initialHistory = [{
+        date: new Date().toISOString(),
+        step: selectedStep,
+        note: note || "รับเรื่องเข้าสู่ระบบ",
+        officer: assignee || "แอดมินระบบ"
+    }];
+
     const newCase = {
         code: caseCode, citizenId: cid, citizenName: name, phone: phone, type: type,
         description: desc, driveLink: drive, assignee: assignee, assigneePhone: assigneePhone,
-        urgency: currentUrgency, currentStep: selectedStep, note: note, status: status,
+        urgency: currentUrgency, currentStep: selectedStep, 
+        history: initialHistory, // บันทึกประวัติ
+        status: status,
         createdAt: new Date().toISOString(), timestamp: serverTimestamp()
     };
 
@@ -1090,7 +1192,7 @@ window.saveCase = async () => {
     }
 };
 
-/* ─── 5. ระบบแอดมิน - อัปเดตข้อมูล (Update) ─── */
+/* ─── 5. ระบบแอดมิน - อัปเดตข้อมูล (Add History Log) ─── */
 window.updateCaseDetails = async () => {
     if (!currentUser) return;
     
@@ -1099,6 +1201,25 @@ window.updateCaseDetails = async () => {
     const newStep = parseInt(document.getElementById('m-step').value);
     const newNote = document.getElementById('m-note').value.trim();
     
+    if (!newNote) return window.showToast("กรุณากรอกบันทึกการดำเนินการ (Log) ด้วยครับ");
+
+    // ดึงประวัติเดิมมาเพื่อเพิ่มต่อท้าย
+    const existingCase = allComplaints.find(x => x.id === docId);
+    let newHistory = existingCase.history ? [...existingCase.history] : [];
+    
+    // ดึงค่า note เก่า (ถ้ามีและยังไม่มีในประวัติ จะได้ไม่หาย)
+    if (existingCase.note && newHistory.length === 0) {
+        newHistory.push({ date: existingCase.createdAt, step: existingCase.currentStep, note: existingCase.note, officer: existingCase.assignee || 'แอดมินระบบ' });
+    }
+    
+    // เพิ่มประวัติใหม่
+    newHistory.push({
+        date: new Date().toISOString(),
+        step: newStep,
+        note: newNote,
+        officer: newAssignee || 'เจ้าหน้าที่'
+    });
+
     let newStatus = 'new';
     if (newStep === 5) newStatus = 'done';
     else if (newAssignee !== '') newStatus = 'wip';
@@ -1115,29 +1236,24 @@ window.updateCaseDetails = async () => {
             assignee: newAssignee,
             assigneePhone: assigneePhone,
             currentStep: newStep,
-            note: newNote,
+            history: newHistory, // บันทึกประวัติชุดใหม่
             status: newStatus
         });
-        window.showToast("อัปเดตข้อมูลสำเร็จ ✓");
+        window.showToast("อัปเดตความคืบหน้าสำเร็จ ✓");
         window.closeModal();
     } catch (error) {
         console.error("Update Error:", error);
         window.showToast("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
     } finally {
-        btn.disabled = false; btn.textContent = "บันทึกการเปลี่ยนแปลง";
+        btn.disabled = false; btn.textContent = "บันทึกอัปเดตใหม่";
     }
 };
 
 /* ─── 6. ระบบแอดมิน - ลบข้อมูล (Delete) ─── */
-window.openConfirmDelete = () => {
-    document.getElementById('confirm-modal').classList.add('show');
-};
-window.closeConfirmDelete = () => {
-    document.getElementById('confirm-modal').classList.remove('show');
-};
+window.openConfirmDelete = () => { document.getElementById('confirm-modal').classList.add('show'); };
+window.closeConfirmDelete = () => { document.getElementById('confirm-modal').classList.remove('show'); };
 window.executeDelete = async () => {
     if (!currentUser) return;
-    
     const docId = document.getElementById('m-docId').value;
     const btn = document.getElementById('btn-confirm-del');
     btn.disabled = true; btn.textContent = "กำลังลบ...";
@@ -1156,7 +1272,7 @@ window.executeDelete = async () => {
     }
 };
 
-/* ─── 7. สร้างข้อมูลจำลอง (Mock Data) ─── */
+/* ─── 7. สร้างข้อมูลจำลองแบบมี History (Mock Data) ─── */
 window.generateMockData = async () => {
     if (!currentUser) return window.showToast("กรุณารอระบบเชื่อมต่อสักครู่");
     const btn = document.getElementById('btn-gen-mock');
@@ -1172,28 +1288,54 @@ window.generateMockData = async () => {
             const runningNo = String(allComplaints.length + i).padStart(4, '0');
             const caseCode = `DT-${year}-${runningNo}`;
             const cid = i === 1 ? "1234567890123" : "1" + Math.floor(Math.random()*1000000000000).toString().padStart(12, '0');
+            
             const hasAssignee = Math.random() > 0.3;
             const assigneeName = hasAssignee ? officerKeys[Math.floor(Math.random() * officerKeys.length)] : "";
             const assigneePhone = hasAssignee ? knownOfficers[assigneeName] : "";
-            const step = hasAssignee ? Math.floor(Math.random() * 5) + 1 : 1;
-            const status = step === 5 ? "done" : (hasAssignee ? "wip" : "new");
+            const finalStep = hasAssignee ? Math.floor(Math.random() * 5) + 1 : 1;
+            const status = finalStep === 5 ? "done" : (hasAssignee ? "wip" : "new");
             
             const pastDate = new Date();
             pastDate.setDate(pastDate.getDate() - Math.floor(Math.random() * 60));
+
+            // สร้าง History หลายๆ ขั้น
+            let mockHistory = [];
+            mockHistory.push({
+                date: pastDate.toISOString(), step: 1, 
+                note: "รับเรื่องร้องเรียนผ่านระบบออนไลน์ พร้อมรับเอกสารประกอบคำร้องเบื้องต้น", 
+                officer: "แอดมินระบบ"
+            });
+            
+            if (finalStep >= 2) {
+                let d2 = new Date(pastDate); d2.setDate(d2.getDate() + 2);
+                mockHistory.push({
+                    date: d2.toISOString(), step: 2, 
+                    note: `ลงพื้นที่ตรวจสอบข้อเท็จจริงเบื้องต้น สอบถามพยานแวดล้อมและรวบรวมหลักฐานเพิ่มเติม`, 
+                    officer: assigneeName
+                });
+            }
+            if (finalStep >= 3) {
+                let d3 = new Date(pastDate); d3.setDate(d3.getDate() + 7);
+                mockHistory.push({
+                    date: d3.toISOString(), step: 3, 
+                    note: `ส่งหนังสือเชิญคู่กรณีทั้งสองฝ่ายมาเจรจาไกล่เกลี่ย ณ ศูนย์ดำรงธรรม ในวันที่ ${d3.getDate()+5}/${d3.getMonth()+1}/${d3.getFullYear()+543}`, 
+                    officer: assigneeName
+                });
+            }
 
             const newCase = {
                 code: caseCode, citizenId: cid, citizenName: mockNames[i % mockNames.length] + " (จำลอง)",
                 phone: "08" + Math.floor(Math.random()*100000000).toString().padStart(8, '0'),
                 type: mockTypes[i % mockTypes.length],
-                description: "ข้อร้องเรียนจำลองลำดับที่ " + i + " เพื่อทดสอบระบบหน้า Dashboard และการแสดงผล",
+                description: "ข้อร้องเรียนจำลองลำดับที่ " + i + " เพื่อทดสอบระบบหน้า Dashboard และการปริ้นรายงาน\n\nผู้ร้องขอความช่วยเหลือให้ติดตามการดำเนินงานของหน่วยงานที่เกี่ยวข้อง",
                 driveLink: "", assignee: assigneeName, assigneePhone: assigneePhone,
-                urgency: Math.random() > 0.8 ? "urgent" : "normal", currentStep: step,
-                note: "ถูกสร้างขึ้นจากระบบอัตโนมัติ เพื่อเป็นข้อมูลจำลอง", status: status,
+                urgency: Math.random() > 0.8 ? "urgent" : "normal", currentStep: finalStep,
+                history: mockHistory, status: status,
                 createdAt: pastDate.toISOString(), timestamp: serverTimestamp()
             };
             await addDoc(complaintsRef, newCase);
         }
-        window.showToast("สร้างข้อมูลจำลอง 20 เคส สำเร็จ! กรุณาตรวจสอบหน้า Dashboard");
+        window.showToast("สร้างข้อมูลจำลอง 20 เคสพร้อมประวัติ สำเร็จ!");
     } catch (error) {
         console.error("Mock Gen Error:", error);
         window.showToast("เกิดข้อผิดพลาดในการสร้างข้อมูล");
@@ -1222,7 +1364,16 @@ window.searchCase = () => {
     document.getElementById('r-code').textContent = foundCase.code;
     document.getElementById('r-date').textContent = 'วันที่ยื่น: ' + thaiDate;
     document.getElementById('r-subject').textContent = foundCase.description.substring(0, 80) + (foundCase.description.length > 80 ? '...' : '');
-    document.getElementById('r-note').textContent = foundCase.note || 'ไม่มีบันทึกเพิ่มเติม';
+    
+    // ดึงโน้ตล่าสุดมาแสดงให้ประชาชนเห็น
+    let latestNote = "กำลังดำเนินการตามขั้นตอน";
+    if (foundCase.history && foundCase.history.length > 0) {
+        const sortedHis = [...foundCase.history].sort((a,b) => new Date(b.date) - new Date(a.date));
+        latestNote = sortedHis[0].note;
+    } else if (foundCase.note) {
+        latestNote = foundCase.note;
+    }
+    document.getElementById('r-note').textContent = latestNote;
     
     const officerName = foundCase.assignee || 'อยู่ระหว่างมอบหมาย';
     const officerPhone = foundCase.assigneePhone ? ` · โทร. ${foundCase.assigneePhone}` : '';
@@ -1243,32 +1394,58 @@ window.searchCase = () => {
     card.style.display = 'block';
 };
 
-/* ─── Rendering UI ─── */
+/* ─── 9. เปิดหน้าต่าง Modal อัปเดตและแสดงประวัติ ─── */
 window.openCaseDetails = (docId) => {
     const c = allComplaints.find(x => x.id === docId);
     if(!c) return window.showToast('ไม่พบข้อมูล');
 
+    // ข้อมูลทั่วไป
     document.getElementById('m-docId').value = docId;
     document.getElementById('m-code').textContent = c.code;
     document.getElementById('m-name').textContent = c.citizenName;
     document.getElementById('m-cid').textContent = c.citizenId;
     document.getElementById('m-phone').textContent = c.phone;
     document.getElementById('m-type').textContent = c.type;
-    
     const d = new Date(c.createdAt);
     document.getElementById('m-date').textContent = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()+543}`;
     document.getElementById('m-desc').textContent = c.description;
     
     const driveDiv = document.getElementById('m-drive-container');
-    if(c.driveLink) {
-        driveDiv.innerHTML = `<button class="btn-drive" onclick="window.open('${c.driveLink}', '_blank')">เปิดเอกสารแนบ (Drive) ↗</button>`;
-    } else {
-        driveDiv.innerHTML = `<span style="font-size:12px;color:var(--gray-500)">ไม่มีเอกสารแนบ</span>`;
+    if(c.driveLink) driveDiv.innerHTML = `<button class="btn-drive" onclick="window.open('${c.driveLink}', '_blank')">เปิดเอกสารแนบ (Drive) ↗</button>`;
+    else driveDiv.innerHTML = `<span style="font-size:12px;color:var(--gray-500)">ไม่มีเอกสารแนบ</span>`;
+
+    // อัปเดตส่วน History (Timeline)
+    const hisDiv = document.getElementById('m-history-list');
+    let historyData = c.history ? [...c.history] : [];
+    
+    // ถ้าเคสเก่ามีแค่ note เดียว ให้แปลงเป็นประวัติ 1 อัน
+    if (historyData.length === 0 && c.note) {
+        historyData.push({ date: c.createdAt, step: c.currentStep, note: c.note, officer: c.assignee || 'แอดมิน' });
     }
 
+    if (historyData.length > 0) {
+        // เรียงจากเก่าไปใหม่เพื่อแสดงแบบ Timeline
+        historyData.sort((a,b) => new Date(a.date) - new Date(b.date));
+        hisDiv.innerHTML = historyData.map(h => {
+            const hd = new Date(h.date);
+            const dateStr = `${hd.getDate()}/${hd.getMonth()+1}/${hd.getFullYear()+543} เวลา ${String(hd.getHours()).padStart(2,'0')}:${String(hd.getMinutes()).padStart(2,'0')} น.`;
+            const stepLabel = STEPS.find(s => s.id === h.step)?.label || `ขั้นตอน ${h.step}`;
+            return `
+            <div class="history-item">
+              <div class="hi-date">${dateStr}</div>
+              <div class="hi-step">ขั้นที่ ${h.step} : ${stepLabel}</div>
+              <div class="hi-note">${h.note}</div>
+              <div class="hi-officer">ผู้บันทึก: ${h.officer}</div>
+            </div>`;
+        }).join('');
+    } else {
+        hisDiv.innerHTML = `<span style="font-size:13px; color:var(--gray-500)">ยังไม่มีประวัติการดำเนินการ</span>`;
+    }
+
+    // เตรียมฟอร์มอัปเดตใหม่ (เคลียร์ค่าเก่าออก)
     document.getElementById('m-assignee').value = c.assignee || "";
     document.getElementById('m-step').value = c.currentStep;
-    document.getElementById('m-note').value = c.note || "";
+    document.getElementById('m-note').value = ""; // เคลียร์ช่องเตรียมให้พิมพ์อัปเดตใหม่
 
     document.getElementById('case-modal').classList.add('show');
 };
@@ -1277,6 +1454,49 @@ window.closeModal = () => {
     document.getElementById('case-modal').classList.remove('show');
 };
 
+/* ─── 10. ระบบ Print เอกสาร A4 ─── */
+window.printCase = () => {
+    const docId = document.getElementById('m-docId').value;
+    const c = allComplaints.find(x => x.id === docId);
+    if(!c) return;
+
+    // เติมข้อมูลลงในแบบฟอร์มปริ้น
+    const d = new Date(c.createdAt);
+    document.getElementById('p-code').textContent = c.code;
+    document.getElementById('p-date').textContent = `${d.getDate()} / ${d.getMonth()+1} / ${d.getFullYear()+543}`;
+    document.getElementById('p-name').textContent = c.citizenName;
+    document.getElementById('p-cid').textContent = c.citizenId;
+    document.getElementById('p-type').textContent = c.type;
+    document.getElementById('p-phone').textContent = c.phone;
+    document.getElementById('p-desc').textContent = c.description;
+
+    const pHisList = document.getElementById('p-history-list');
+    let historyData = c.history ? [...c.history] : [];
+    if (historyData.length === 0 && c.note) {
+        historyData.push({ date: c.createdAt, step: c.currentStep, note: c.note, officer: c.assignee || 'แอดมิน' });
+    }
+
+    if (historyData.length > 0) {
+        historyData.sort((a,b) => new Date(a.date) - new Date(b.date));
+        pHisList.innerHTML = historyData.map(h => {
+            const hd = new Date(h.date);
+            const dateStr = `${hd.getDate()}/${hd.getMonth()+1}/${hd.getFullYear()+543} (${String(hd.getHours()).padStart(2,'0')}:${String(hd.getMinutes()).padStart(2,'0')} น.)`;
+            const stepLabel = STEPS.find(s => s.id === h.step)?.label || `ขั้นตอน ${h.step}`;
+            return `
+            <div class="print-history-item">
+              <div class="print-hi-head">ขั้นที่ ${h.step} : ${stepLabel} <span class="print-hi-date">| อัปเดตเมื่อ: ${dateStr} | โดย: ${h.officer}</span></div>
+              <div class="print-hi-note">${h.note}</div>
+            </div>`;
+        }).join('');
+    } else {
+        pHisList.innerHTML = `<span style="font-size:13px; color:#666;">ยังไม่มีประวัติการดำเนินการ</span>`;
+    }
+
+    // สั่งปริ้น
+    window.print();
+};
+
+/* ─── Rendering UI (Dashboard & Tables) ─── */
 function renderPendingTable() {
     const sorted = [...allComplaints].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
     const badgeMap = { new:'badge-new', urgent:'badge-urgent', wip:'badge-wip', done:'badge-done' };
@@ -1297,7 +1517,7 @@ function renderPendingTable() {
           <td><span style="font-size:11px;background:var(--gray-100);padding:2px 8px;border-radius:4px;color:var(--gray-700)">${r.type.substring(0, 20)}</span></td>
           <td><span class="td-muted">${dateStr}</span></td>
           <td><span class="badge ${badgeMap[b]}">${labelMap[b]}</span></td>
-          <td><button class="btn-assign" onclick="openCaseDetails('${r.id}')">ดู/แก้ไข</button></td>
+          <td><button class="btn-assign" onclick="openCaseDetails('${r.id}')">ดู/อัปเดต</button></td>
         </tr>`;
     }).join('');
     
@@ -1377,7 +1597,7 @@ function renderDashboard() {
               <td>${s.citizenName}</td>
               <td><span style="font-size:11px;background:var(--gray-100);padding:2px 8px;border-radius:4px">${stepName}</span></td>
               <td class="td-muted">${s.assignee || '-'}</td>
-              <td><button class="btn-assign" onclick="openCaseDetails('${s.id}')">ดู/แก้ไข</button></td>
+              <td><button class="btn-assign" onclick="openCaseDetails('${s.id}')">ดู/อัปเดต</button></td>
             </tr>`;
         }).join('');
         if(sortedCases.length === 0) staleBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#888;">ไม่มีข้อมูล</td></tr>`;
@@ -1427,7 +1647,6 @@ function renderReports() {
 
 /* ─── UI Helpers ─── */
 window.goPage = (id, el) => {
-  // ระบบป้องกัน (Route Guard): ถ้าพยายามเข้าหน้าแอดมิน แต่ยังไม่ได้ล็อกอิน ให้เด้งไปหน้า login
   const adminPages = ['page-admin', 'page-dashboard', 'page-reports', 'page-settings'];
   if (adminPages.includes(id) && !isAdminLoggedIn) {
       id = 'page-login';
