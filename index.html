@@ -121,7 +121,7 @@ body {
   font-weight: 500; cursor: pointer; transition: background .15s; white-space: nowrap;
 }
 .btn-search:hover { background: var(--green-mid); }
-.helper-text { font-size: 11px; color: var(--gray-500); margin-top: 5px; }
+.helper-text { font-size: 11px; color: var(--gray-500); margin-top: 8px; line-height: 1.4; }
 
 /* Result card */
 .result-area { margin-top: 1.5rem; display: none; }
@@ -170,7 +170,7 @@ body {
 .case-officer { font-size: 11px; color: var(--gray-500); }
 .no-result { text-align: center; padding: 1.5rem; color: var(--gray-500); font-size: 13px; display: none; }
 
-/* ─── ADMIN PAGE ─── */
+/* ─── ADMIN LAYOUT ─── */
 .admin-layout { display: flex; flex: 1; }
 .sidebar {
   width: 210px; background: var(--white); border-right: 1px solid var(--border);
@@ -194,6 +194,7 @@ body {
 .page-title { font-size: 18px; font-weight: 600; margin-bottom: .25rem; }
 .page-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 1.5rem; }
 
+/* Forms */
 .form-card {
   background: var(--white); border: 1px solid var(--border);
   border-radius: var(--r-lg); padding: 1.5rem; margin-bottom: 1.25rem;
@@ -205,9 +206,7 @@ body {
   padding-bottom: .5rem; border-bottom: 1px solid var(--border);
 }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 .form-group { display: flex; flex-direction: column; }
-.form-group.full { grid-column: 1 / -1; }
 .form-label { font-size: 12px; font-weight: 500; color: var(--gray-700); margin-bottom: 4px; }
 .form-input, .form-select, .form-textarea {
   padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r-sm);
@@ -265,7 +264,7 @@ body {
 }
 .btn-cancel:hover { background: var(--gray-100); }
 
-/* Pending table */
+/* Tables */
 .table-card {
   background: var(--white); border: 1px solid var(--border);
   border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-sm);
@@ -294,8 +293,7 @@ tr:hover td { background: var(--gray-50); }
 }
 .btn-assign:hover { background: var(--green-pale); border-color: var(--green-mid); color: var(--green); }
 
-/* ─── DASHBOARD PAGE ─── */
-.dash-main { flex: 1; padding: 1.75rem; overflow-y: auto; }
+/* DASHBOARD STATS */
 .dash-topbar { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; }
 .dash-title { font-size: 18px; font-weight: 600; }
 .month-select { padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); font-family: var(--font); font-size: 13px; background: var(--white); cursor: pointer; }
@@ -340,14 +338,7 @@ tr:hover td { background: var(--gray-50); }
 .alert-text { font-size: 13px; color: var(--orange); font-weight: 500; }
 .alert-sub { font-size: 11px; color: var(--orange); opacity: .8; }
 
-.btn-follow {
-  padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: var(--font);
-  background: var(--amber-light); border: 1px solid rgba(184,106,0,.2);
-  border-radius: var(--r-sm); color: var(--amber); font-weight: 500; transition: all .12s;
-}
-.btn-follow:hover { background: var(--amber); color: var(--white); }
-
-/* ─── Toast ─── */
+/* Toast */
 .toast {
   position: fixed; bottom: 2rem; right: 2rem; background: var(--gray-900);
   color: var(--white); padding: .75rem 1.25rem; border-radius: var(--r-md);
@@ -368,7 +359,7 @@ tr:hover td { background: var(--gray-50); }
       <div class="brand-icon">ดธ</div>
       <div>
         <div style="font-size:13px;font-weight:600">ศูนย์ดำรงธรรม</div>
-        <div style="font-size:10px;color:var(--gray-500);font-weight:400">จังหวัดภูเก็ต</div>
+        <div style="font-size:10px;color:var(--gray-500);font-weight:400">จังหวัดเชียงราย</div>
       </div>
     </a>
     <div class="nav-sep"></div>
@@ -390,7 +381,10 @@ tr:hover td { background: var(--gray-50); }
           onkeydown="if(event.key==='Enter')searchCase()">
         <button class="btn-search" onclick="searchCase()">ค้นหา</button>
       </div>
-      <div class="helper-text">ข้อมูลเลขบัตรประชาชนของท่านจะถูกใช้เพื่อตรวจสอบสถานะเท่านั้น</div>
+      <div class="helper-text">
+        ข้อมูลเลขบัตรประชาชนของท่านจะถูกใช้เพื่อตรวจสอบสถานะเท่านั้น<br>
+        <span style="color:var(--orange)">(ทดสอบระบบ: ลองกรอก <b style="cursor:pointer" onclick="document.getElementById('cid-input').value='1234567890123'; searchCase();">1234567890123</b>)</span>
+      </div>
 
       <div id="result-area" class="result-area">
         <div id="no-result" class="no-result">ไม่พบข้อมูลสำหรับเลขบัตรประชาชนนี้</div>
@@ -398,25 +392,44 @@ tr:hover td { background: var(--gray-50); }
           <div class="case-header">
             <div>
               <div class="case-id" id="r-code">DT-2568-0042</div>
-              <div class="case-date" id="r-date">วันที่ยื่น: 1 มีนาคม 2568</div>
+              <div class="case-date" id="r-date">วันที่ยื่น: -</div>
             </div>
             <span class="badge badge-wip" id="r-badge">กำลังดำเนินการ</span>
           </div>
           <div class="case-body">
-            <div class="case-subject" id="r-subject">ปัญหาที่ดินทับซ้อนกับเพื่อนบ้าน บริเวณซอย 3 ต.เชิงทะเล อ.ถลาง</div>
+            <div class="case-subject" id="r-subject">รายละเอียดเรื่อง...</div>
 
             <div class="timeline" id="r-timeline">
               <!-- injected by JS -->
             </div>
 
-            <div class="case-note" id="r-note">เจ้าหน้าที่นัดไกล่เกลี่ยในวันที่ 20 เมษายน 2568 เวลา 09:00 น. ณ ศูนย์ดำรงธรรมจังหวัดภูเก็ต</div>
-            <div class="case-officer" id="r-officer">ผู้รับผิดชอบ: นายสมชาย รักดี  ·  โทร. 076-123-456</div>
+            <div class="case-note" id="r-note">หมายเหตุ...</div>
+            <div class="case-officer" id="r-officer">ผู้รับผิดชอบ...</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+
+<!-- ═══════════════════════════════════════════
+     SHARED ADMIN SIDEBAR
+═══════════════════════════════════════════ -->
+<aside id="shared-sidebar" style="display:none;"></aside>
+<script>
+// จัดเก็บเมนูด้านข้างไว้ใช้ร่วมกันหลายหน้า
+const sidebarHTML = `
+  <div class="sidebar-section">เมนู</div>
+  <div class="sidebar-item active" onclick="goPage('page-admin', this)"><span class="icon">＋</span>รับเรื่องใหม่</div>
+  <div class="sidebar-item" onclick="goPage('page-dashboard', this)"><span class="icon">☰</span>รายการทั้งหมด <span class="badge-count" id="menu-badge-total">0</span></div>
+  <div class="sidebar-item" onclick="goPage('page-dashboard', this)"><span class="icon">!</span>ยังไม่มอบหมาย <span class="badge-count" id="menu-badge-unassigned">0</span></div>
+  <div class="sidebar-item" onclick="window.showToast('หน้าระบบมอบหมายงานกำลังพัฒนา')"><span class="icon">↗</span>มอบหมายงาน</div>
+  <div class="sidebar-section" style="margin-top:.5rem">รายงาน</div>
+  <div class="sidebar-item" onclick="goPage('page-reports', this)"><span class="icon">▤</span>สรุปรายเดือน</div>
+  <div class="sidebar-item" onclick="goPage('page-settings', this)"><span class="icon">⚙</span>ตั้งค่าระบบ</div>
+`;
+</script>
 
 
 <!-- ═══════════════════════════════════════════
@@ -428,25 +441,16 @@ tr:hover td { background: var(--gray-50); }
       <div class="brand-icon">ดธ</div>
       <div>
         <div style="font-size:13px;font-weight:600">ระบบจัดการ — ศูนย์ดำรงธรรม</div>
-        <div style="font-size:10px;color:var(--gray-500)">จังหวัดภูเก็ต</div>
+        <div style="font-size:10px;color:var(--gray-500)">จังหวัดเชียงราย</div>
       </div>
     </a>
     <div class="nav-sep"></div>
-    <button class="nav-btn ghost" onclick="goPage('page-dashboard')">Dashboard</button>
+    <button class="nav-btn ghost" onclick="goPage('page-dashboard', document.querySelectorAll('.sidebar-item')[1])">Dashboard</button>
     <button class="nav-btn ghost" onclick="goPage('page-public')">หน้าประชาชน</button>
   </nav>
 
   <div class="admin-layout">
-    <aside class="sidebar">
-      <div class="sidebar-section">เมนู</div>
-      <div class="sidebar-item active"><span class="icon">＋</span>รับเรื่องใหม่</div>
-      <div class="sidebar-item"><span class="icon">☰</span>รายการทั้งหมด <span class="badge-count" id="menu-badge-total">0</span></div>
-      <div class="sidebar-item"><span class="icon">!</span>ยังไม่มอบหมาย <span class="badge-count" id="menu-badge-unassigned">0</span></div>
-      <div class="sidebar-item"><span class="icon">↗</span>มอบหมายงาน</div>
-      <div class="sidebar-section" style="margin-top:.5rem">รายงาน</div>
-      <div class="sidebar-item"><span class="icon">▤</span>สรุปรายเดือน</div>
-      <div class="sidebar-item"><span class="icon">⚙</span>ตั้งค่าระบบ</div>
-    </aside>
+    <aside class="sidebar admin-sidebar"></aside>
 
     <main class="admin-main">
       <div class="page-title">รับเรื่องร้องเรียนใหม่</div>
@@ -465,19 +469,21 @@ tr:hover td { background: var(--gray-50); }
             <input id="req-cid" class="form-input" type="text" placeholder="1234567890123" maxlength="13" inputmode="numeric">
           </div>
           <div class="form-group">
-            <label class="form-label">เบอร์โทรศัพท์ *</label>
+            <label class="form-label">เบอร์โทรศัพท์ผู้ร้อง *</label>
             <input id="req-phone" class="form-input" type="text" placeholder="08X-XXX-XXXX">
           </div>
           <div class="form-group">
             <label class="form-label">ประเภทเรื่อง</label>
-            <select id="req-type" class="form-select">
+            <select id="req-type" class="form-select" onchange="toggleTypeOther()">
               <option>ที่ดิน / ทรัพย์สิน</option>
               <option>สิ่งแวดล้อม</option>
               <option>สาธารณูปโภค</option>
               <option>แรงงาน</option>
               <option>ผู้บริโภค</option>
-              <option>อื่นๆ</option>
+              <option value="other">อื่นๆ (โปรดระบุ)</option>
             </select>
+            <!-- ช่องสำหรับพิมพ์กรณีเลือก อื่นๆ -->
+            <input id="req-type-other" class="form-input" type="text" style="display:none; margin-top:8px;" placeholder="ระบุประเภทเรื่องที่ร้องเรียน...">
           </div>
         </div>
       </div>
@@ -495,16 +501,22 @@ tr:hover td { background: var(--gray-50); }
             <button class="btn-drive" onclick="openDrive()">เปิดเอกสาร ↗</button>
           </div>
         </div>
+        
+        <!-- ส่วนผู้รับผิดชอบ -->
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">มอบหมายให้</label>
-            <select id="req-assignee" class="form-select">
-              <option value="">— ยังไม่มอบหมาย —</option>
-              <option>นายสมชาย รักดี (ทนายความ)</option>
-              <option>นางสาวมาลี สุขใจ (เจ้าหน้าที่)</option>
-              <option>นายวิชัย ประดับ (เจ้าหน้าที่)</option>
-            </select>
+            <label class="form-label">มอบหมายให้เจ้าหน้าที่</label>
+            <!-- ใช้ Datalist เพื่อให้เลือกหรือพิมพ์ใหม่ได้ -->
+            <input list="officers-list" id="req-assignee" class="form-input" placeholder="เลือกหรือพิมพ์ชื่อเจ้าหน้าที่..." oninput="autoFillOfficerPhone()">
+            <datalist id="officers-list">
+              <option value="นายสมชาย รักดี (ทนายความ)">
+              <option value="นางสาวมาลี สุขใจ (เจ้าหน้าที่)">
+              <option value="นายวิชัย ประดับ (เจ้าหน้าที่)">
+            </datalist>
+            <!-- ช่องเบอร์โทรเจ้าหน้าที่ -->
+            <input id="req-assignee-phone" class="form-input" style="margin-top:8px;" placeholder="เบอร์โทรเจ้าหน้าที่ (ระบบจำอัตโนมัติ)">
           </div>
+          
           <div class="form-group">
             <label class="form-label">ระดับความเร่งด่วน</label>
             <div class="urgency-row">
@@ -568,7 +580,7 @@ tr:hover td { background: var(--gray-50); }
       <div class="brand-icon">ดธ</div>
       <div>
         <div style="font-size:13px;font-weight:600">Dashboard — ศูนย์ดำรงธรรม</div>
-        <div style="font-size:10px;color:var(--gray-500)">จังหวัดภูเก็ต</div>
+        <div style="font-size:10px;color:var(--gray-500)">จังหวัดเชียงราย</div>
       </div>
     </a>
     <div class="nav-sep"></div>
@@ -576,89 +588,160 @@ tr:hover td { background: var(--gray-50); }
     <button class="nav-btn ghost" onclick="goPage('page-public')">หน้าประชาชน</button>
   </nav>
 
-  <main class="dash-main">
-    <div class="dash-topbar">
-      <div>
-        <div class="dash-title">ภาพรวมระบบ</div>
-        <div style="font-size:12px;color:var(--gray-500)" id="dash-date">อัพเดตล่าสุด: กำลังโหลด...</div>
-      </div>
-      <select class="month-select">
-        <option>ข้อมูลทั้งหมด (All Time)</option>
-      </select>
-    </div>
+  <div class="admin-layout">
+    <aside class="sidebar admin-sidebar"></aside>
 
-    <!-- Alert -->
-    <div class="alert-banner" id="dash-alert" style="display:none;">
-      <span class="alert-icon">⚠</span>
-      <div>
-        <div class="alert-text" id="dash-alert-text">มี 0 เรื่องที่ยังไม่ได้รับมอบหมาย</div>
-        <div class="alert-sub">กรุณาตรวจสอบและมอบหมายงาน</div>
+    <main class="dash-main">
+      <div class="dash-topbar">
+        <div>
+          <div class="dash-title">ภาพรวมระบบ</div>
+          <div style="font-size:12px;color:var(--gray-500)" id="dash-date">อัพเดตล่าสุด: กำลังโหลด...</div>
+        </div>
+        <select class="month-select">
+          <option>ข้อมูลทั้งหมด (All Time)</option>
+        </select>
       </div>
-      <button class="btn-save" style="margin-left:auto;padding:6px 14px;font-size:12px" onclick="goPage('page-admin')">จัดการ →</button>
-    </div>
 
-    <!-- Stat cards -->
-    <div class="stat-grid">
-      <div class="stat-card accent-green">
-        <div class="stat-label">รับเรื่องทั้งหมด</div>
-        <div class="stat-num green" id="stat-total">0</div>
-        <div class="stat-sub">เรื่องในระบบ</div>
+      <!-- Alert -->
+      <div class="alert-banner" id="dash-alert" style="display:none;">
+        <span class="alert-icon">⚠</span>
+        <div>
+          <div class="alert-text" id="dash-alert-text">มี 0 เรื่องที่ยังไม่ได้รับมอบหมาย</div>
+          <div class="alert-sub">กรุณาตรวจสอบและมอบหมายงาน</div>
+        </div>
+        <button class="btn-save" style="margin-left:auto;padding:6px 14px;font-size:12px" onclick="goPage('page-admin')">จัดการ →</button>
       </div>
-      <div class="stat-card accent-orange">
-        <div class="stat-label">ยังไม่มอบหมาย</div>
-        <div class="stat-num orange" id="stat-unassigned">0</div>
-        <div class="stat-sub">รอดำเนินการด่วน</div>
-      </div>
-      <div class="stat-card accent-amber">
-        <div class="stat-label">กำลังดำเนินการ</div>
-        <div class="stat-num amber" id="stat-wip">0</div>
-        <div class="stat-sub">อยู่ระหว่างดำเนินการ</div>
-      </div>
-      <div class="stat-card accent-gray">
-        <div class="stat-label">ปิดเรื่องแล้ว</div>
-        <div class="stat-num" id="stat-done">0</div>
-        <div class="stat-sub">เสร็จสิ้น</div>
-      </div>
-    </div>
 
-    <div class="dash-grid2">
-      <!-- Progress -->
-      <div class="dash-card">
-        <div class="dash-card-title">ความคืบหน้าตามขั้นตอน</div>
-        <div id="progress-rows"></div>
+      <!-- Stat cards -->
+      <div class="stat-grid">
+        <div class="stat-card accent-green">
+          <div class="stat-label">รับเรื่องทั้งหมด</div>
+          <div class="stat-num green" id="stat-total">0</div>
+          <div class="stat-sub">เรื่องในระบบ</div>
+        </div>
+        <div class="stat-card accent-orange">
+          <div class="stat-label">ยังไม่มอบหมาย</div>
+          <div class="stat-num orange" id="stat-unassigned">0</div>
+          <div class="stat-sub">รอดำเนินการด่วน</div>
+        </div>
+        <div class="stat-card accent-amber">
+          <div class="stat-label">กำลังดำเนินการ</div>
+          <div class="stat-num amber" id="stat-wip">0</div>
+          <div class="stat-sub">อยู่ระหว่างดำเนินการ</div>
+        </div>
+        <div class="stat-card accent-gray">
+          <div class="stat-label">ปิดเรื่องแล้ว</div>
+          <div class="stat-num" id="stat-done">0</div>
+          <div class="stat-sub">เสร็จสิ้น</div>
+        </div>
       </div>
-      <!-- Staff workload -->
-      <div class="dash-card">
-        <div class="dash-card-title">งานตามผู้รับผิดชอบ</div>
-        <table>
-          <thead>
-            <tr>
-              <th>ชื่อเจ้าหน้าที่</th>
-              <th style="text-align:center">กำลังดูแล</th>
-              <th style="text-align:center">เสร็จแล้ว</th>
-            </tr>
-          </thead>
-          <tbody id="staff-tbody"></tbody>
-        </table>
-      </div>
-    </div>
 
-    <!-- Stale cases -->
-    <div class="table-card">
-      <div class="table-head">
-        <div class="table-head-title">เรื่องที่ยังไม่เสร็จสิ้น (เรียงตามวันที่)</div>
+      <div class="dash-grid2">
+        <!-- Progress -->
+        <div class="dash-card">
+          <div class="dash-card-title">ความคืบหน้าตามขั้นตอน</div>
+          <div id="progress-rows"></div>
+        </div>
+        <!-- Staff workload -->
+        <div class="dash-card">
+          <div class="dash-card-title">งานตามผู้รับผิดชอบ</div>
+          <table>
+            <thead>
+              <tr>
+                <th>ชื่อเจ้าหน้าที่</th>
+                <th style="text-align:center">กำลังดูแล</th>
+                <th style="text-align:center">เสร็จแล้ว</th>
+              </tr>
+            </thead>
+            <tbody id="staff-tbody"></tbody>
+          </table>
+        </div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>รหัส</th><th>ชื่อผู้ร้อง</th><th>ขั้นตอนปัจจุบัน</th><th>ผู้รับผิดชอบ</th><th>ดำเนินการ</th></tr>
-          </thead>
-          <tbody id="stale-tbody"></tbody>
-        </table>
+
+      <!-- Stale cases -->
+      <div class="table-card">
+        <div class="table-head">
+          <div class="table-head-title">เรื่องที่ยังไม่เสร็จสิ้น (เรียงตามวันที่)</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>รหัส</th><th>ชื่อผู้ร้อง</th><th>ขั้นตอนปัจจุบัน</th><th>ผู้รับผิดชอบ</th><th>ดำเนินการ</th></tr>
+            </thead>
+            <tbody id="stale-tbody"></tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  </main>
+    </main>
+  </div>
 </div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: REPORTS (สรุปรายเดือน)
+═══════════════════════════════════════════ -->
+<div id="page-reports" class="page">
+  <nav class="topnav">
+    <a class="brand" href="#">
+      <div class="brand-icon">ดธ</div>
+      <div>
+        <div style="font-size:13px;font-weight:600">รายงาน — ศูนย์ดำรงธรรม</div>
+        <div style="font-size:10px;color:var(--gray-500)">จังหวัดเชียงราย</div>
+      </div>
+    </a>
+    <div class="nav-sep"></div>
+    <button class="nav-btn ghost" onclick="goPage('page-public')">หน้าประชาชน</button>
+  </nav>
+
+  <div class="admin-layout">
+    <aside class="sidebar admin-sidebar"></aside>
+    <main class="dash-main">
+      <div class="page-title">สรุปรายงานประจำเดือน</div>
+      <div class="page-sub">ข้อมูลสถิติเพื่อการบริหารจัดการ</div>
+      <div class="form-card" style="text-align:center; padding: 4rem 2rem;">
+        <div style="font-size: 40px; margin-bottom: 1rem;">📊</div>
+        <h3 style="margin-bottom: .5rem; color: var(--gray-700)">อยู่ระหว่างการพัฒนา</h3>
+        <p style="color: var(--gray-500); font-size: 13px;">หน้านี้จะใช้สำหรับส่งออกรายงานรูปแบบ PDF และ Excel ในอนาคต</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: SETTINGS (ตั้งค่าระบบ)
+═══════════════════════════════════════════ -->
+<div id="page-settings" class="page">
+  <nav class="topnav">
+    <a class="brand" href="#">
+      <div class="brand-icon">ดธ</div>
+      <div>
+        <div style="font-size:13px;font-weight:600">ตั้งค่าระบบ — ศูนย์ดำรงธรรม</div>
+        <div style="font-size:10px;color:var(--gray-500)">จังหวัดเชียงราย</div>
+      </div>
+    </a>
+    <div class="nav-sep"></div>
+    <button class="nav-btn ghost" onclick="goPage('page-public')">หน้าประชาชน</button>
+  </nav>
+
+  <div class="admin-layout">
+    <aside class="sidebar admin-sidebar"></aside>
+    <main class="dash-main">
+      <div class="page-title">ตั้งค่าระบบ</div>
+      <div class="page-sub">จัดการข้อมูลพื้นฐานและทดสอบระบบ</div>
+      
+      <div class="form-card">
+        <div class="form-section-title">เครื่องมือสำหรับนักพัฒนา</div>
+        <p style="font-size: 13px; color: var(--gray-700); margin-bottom: 1rem;">
+          ปุ่มด้านล่างนี้จะทำการสร้างเรื่องร้องเรียนจำลองจำนวน 20 เคส เข้าสู่ฐานข้อมูล Firebase ของคุณอัตโนมัติ 
+          เพื่อช่วยให้คุณเห็นภาพรวมของหน้า Dashboard และตารางต่างๆ ได้ชัดเจนยิ่งขึ้น
+        </p>
+        <button id="btn-gen-mock" class="btn-save" style="background: var(--orange);" onclick="generateMockData()">
+          ⚡ สร้างข้อมูลจำลอง 20 เคส
+        </button>
+      </div>
+    </main>
+  </div>
+</div>
+
 
 <!-- Toast -->
 <div id="toast" class="toast"></div>
@@ -674,7 +757,6 @@ import { getFirestore, collection, addDoc, getDocs, onSnapshot, serverTimestamp 
 
 /* ====================================================================
    ตั้งค่า FIREBASE CONFIG (นำข้อมูลจากโปรเจกต์ของคุณมาวางทับส่วนนี้)
-   เมื่อศูนย์ดำรงธรรมสมัครอีเมลใหม่ ให้นำ Config ของเขามาวางตรงนี้แทนครับ
 ==================================================================== */
 let firebaseConfig = {
   apiKey: "AIzaSyBJfcCyRIWjjBTK0kzWq7si-3Y1YkAEG38",
@@ -695,14 +777,13 @@ if (typeof __firebase_config !== 'undefined') {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'damrongdhama-phuket';
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'damrongdhama-chiangrai';
 
-// เราใช้ Path นี้เพื่อให้ประชาชนและแอดมินใช้งานข้อมูลชุดเดียวกันได้
 const complaintsRef = collection(db, 'artifacts', appId, 'public', 'data', 'complaints');
 
 /* ─── State & Data ─── */
 let currentUser = null;
-let allComplaints = []; // เก็บข้อมูลทั้งหมดไว้ใน Memory เพื่อค้นหาและทำ Dashboard
+let allComplaints = []; 
 
 const STEPS = [
   { id:1, label:'รับเรื่อง', color:'#1D9E75' },
@@ -715,24 +796,30 @@ const STEPS = [
 let selectedStep = 1;
 let currentUrgency = 'normal';
 
-/* ─── 1. ระบบ Authentication (เข้าสู่ระบบแบบไม่ระบุตัวตน) ─── */
+// ข้อมูลเจ้าหน้าที่ และ เบอร์โทรเริ่มต้น
+const knownOfficers = {
+  "นายสมชาย รักดี (ทนายความ)": "081-234-5678",
+  "นางสาวมาลี สุขใจ (เจ้าหน้าที่)": "089-876-5432",
+  "นายวิชัย ประดับ (เจ้าหน้าที่)": "082-345-6789"
+};
+
+/* ─── 1. ระบบ Authentication ─── */
 async function initAuth() {
     try {
         await signInAnonymously(auth);
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             if (user) {
-                // เมื่อ Auth ผ่าน ให้เริ่มดึงข้อมูล (Real-time listener)
                 setupRealtimeListener();
             }
         });
     } catch (error) {
         console.error("Auth Error:", error);
-        showToast("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ");
+        window.showToast("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ");
     }
 }
 
-/* ─── 2. ระบบ Real-time ดึงข้อมูลจากฐานข้อมูล ─── */
+/* ─── 2. ระบบ Real-time ─── */
 function setupRealtimeListener() {
     if (!currentUser) return;
     
@@ -742,7 +829,6 @@ function setupRealtimeListener() {
             ...doc.data()
         }));
         
-        // อัปเดตหน้าจอทั้งหมดเมื่อมีข้อมูลใหม่
         renderPendingTable();
         renderDashboard();
     }, (error) => {
@@ -752,31 +838,39 @@ function setupRealtimeListener() {
 
 /* ─── 3. ระบบแอดมิน - บันทึกข้อมูล ─── */
 window.saveCase = async () => {
-    if (!currentUser) return showToast("ระบบยังไม่พร้อม กรุณารอสักครู่");
+    if (!currentUser) return window.showToast("ระบบยังไม่พร้อม กรุณารอสักครู่");
 
     const name = document.getElementById('req-name').value.trim();
     const cid = document.getElementById('req-cid').value.trim();
     const phone = document.getElementById('req-phone').value.trim();
-    const type = document.getElementById('req-type').value;
+    
+    // จัดการประเภทเรื่อง
+    let type = document.getElementById('req-type').value;
+    if (type === 'other') {
+        type = "อื่นๆ: " + document.getElementById('req-type-other').value.trim();
+    }
+
     const desc = document.getElementById('req-desc').value.trim();
     const drive = document.getElementById('req-drive').value.trim();
-    const assignee = document.getElementById('req-assignee').value;
+    
+    // ผู้รับผิดชอบ และเบอร์
+    const assignee = document.getElementById('req-assignee').value.trim();
+    const assigneePhone = document.getElementById('req-assignee-phone').value.trim();
+    
     const note = document.getElementById('req-note').value.trim();
 
     if (!name || !cid || !desc) {
-        return showToast("กรุณากรอก ชื่อ, เลข ปชช. และ เนื้อเรื่อง ให้ครบถ้วน");
+        return window.showToast("กรุณากรอก ชื่อ, เลข ปชช. และ เนื้อเรื่อง ให้ครบถ้วน");
     }
 
     const btn = document.getElementById('btn-save');
     btn.disabled = true;
     btn.textContent = "กำลังบันทึก...";
 
-    // สร้างรหัสเคส (จำลอง)
     const year = new Date().getFullYear() + 543;
     const runningNo = String(allComplaints.length + 1).padStart(4, '0');
     const caseCode = `DT-${year}-${runningNo}`;
     
-    // จัดการสถานะ
     let status = 'new';
     if (selectedStep === 5) status = 'done';
     else if (assignee !== '') status = 'wip';
@@ -790,28 +884,92 @@ window.saveCase = async () => {
         description: desc,
         driveLink: drive,
         assignee: assignee,
+        assigneePhone: assigneePhone, // บันทึกเบอร์ทนายลงฐานข้อมูล
         urgency: currentUrgency,
         currentStep: selectedStep,
         note: note,
         status: status,
-        createdAt: new Date().toISOString(), // ใช้ ISO เพื่อให้เรียงง่าย
-        timestamp: serverTimestamp() // สำหรับฐานข้อมูล
+        createdAt: new Date().toISOString(),
+        timestamp: serverTimestamp()
     };
 
     try {
         await addDoc(complaintsRef, newCase);
-        showToast(`บันทึกเรื่องร้องเรียน ${caseCode} สำเร็จ ✓`);
+        window.showToast(`บันทึกเรื่องร้องเรียน ${caseCode} สำเร็จ ✓`);
         window.clearForm();
     } catch (error) {
         console.error("Save Error:", error);
-        showToast("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+        window.showToast("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     } finally {
         btn.disabled = false;
         btn.textContent = "บันทึกรับเรื่อง";
     }
 };
 
-/* ─── 4. ระบบประชาชน - ค้นหาข้อมูล ─── */
+/* ─── 4. สร้างข้อมูลจำลอง (Mock Data) ─── */
+window.generateMockData = async () => {
+    if (!currentUser) return window.showToast("กรุณารอระบบเชื่อมต่อสักครู่");
+    const btn = document.getElementById('btn-gen-mock');
+    btn.disabled = true;
+    btn.textContent = "กำลังสร้าง กรุณารอสักครู่...";
+
+    const mockNames = ["นายอนุชา ดีงาม", "นางประนอม ใจงาม", "นายสมศักดิ์ รักษ์ดี", "นางวิไลวรรณ จันทร์เรือง", "นายกิตติศักดิ์ ทองดี"];
+    const mockTypes = ["ที่ดิน / ทรัพย์สิน", "สิ่งแวดล้อม", "สาธารณูปโภค", "แรงงาน", "ผู้บริโภค"];
+    const officerKeys = Object.keys(knownOfficers);
+
+    try {
+        for(let i=1; i<=20; i++) {
+            const year = new Date().getFullYear() + 543;
+            const runningNo = String(allComplaints.length + i).padStart(4, '0');
+            const caseCode = `DT-${year}-${runningNo}`;
+
+            // ให้เคสแรกมีเลข ปชช. ที่ตั้งใจไว้ทดสอบ
+            const cid = i === 1 ? "1234567890123" : "1" + Math.floor(Math.random()*1000000000000).toString().padStart(12, '0');
+
+            // สุ่มผู้รับผิดชอบ 70% มี 30% ว่าง
+            const hasAssignee = Math.random() > 0.3;
+            const assigneeName = hasAssignee ? officerKeys[Math.floor(Math.random() * officerKeys.length)] : "";
+            const assigneePhone = hasAssignee ? knownOfficers[assigneeName] : "";
+            
+            // สุ่มขั้นตอน (ถ้าไม่มีคนรับเรื่อง ให้เป็นขั้น 1)
+            const step = hasAssignee ? Math.floor(Math.random() * 5) + 1 : 1;
+            const status = step === 5 ? "done" : (hasAssignee ? "wip" : "new");
+
+            // สุ่มวันที่ย้อนหลัง (1-30 วัน)
+            const pastDate = new Date();
+            pastDate.setDate(pastDate.getDate() - Math.floor(Math.random() * 30));
+
+            const newCase = {
+                code: caseCode,
+                citizenId: cid,
+                citizenName: mockNames[i % mockNames.length] + " (จำลอง)",
+                phone: "08" + Math.floor(Math.random()*100000000).toString().padStart(8, '0'),
+                type: mockTypes[i % mockTypes.length],
+                description: "ข้อร้องเรียนจำลองลำดับที่ " + i + " เพื่อทดสอบระบบหน้า Dashboard และการแสดงผล",
+                driveLink: "",
+                assignee: assigneeName,
+                assigneePhone: assigneePhone,
+                urgency: Math.random() > 0.8 ? "urgent" : "normal",
+                currentStep: step,
+                note: "ถูกสร้างขึ้นจากระบบอัตโนมัติ เพื่อเป็นข้อมูลจำลอง",
+                status: status,
+                createdAt: pastDate.toISOString(),
+                timestamp: serverTimestamp()
+            };
+            
+            await addDoc(complaintsRef, newCase);
+        }
+        window.showToast("สร้างข้อมูลจำลอง 20 เคส สำเร็จ! กรุณาตรวจสอบหน้า Dashboard");
+    } catch (error) {
+        console.error("Mock Gen Error:", error);
+        window.showToast("เกิดข้อผิดพลาดในการสร้างข้อมูล");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "⚡ สร้างข้อมูลจำลอง 20 เคส";
+    }
+};
+
+/* ─── 5. ระบบประชาชน - ค้นหาข้อมูล ─── */
 window.searchCase = () => {
     const cid = document.getElementById('cid-input').value.trim();
     const area = document.getElementById('result-area');
@@ -824,29 +982,28 @@ window.searchCase = () => {
     
     if (!cid) return;
 
-    // ค้นหาใน Memory
-    const foundCase = allComplaints.find(c => c.citizenId === cid);
-    
-    if (!foundCase) {
+    // ค้นหาเคสล่าสุดของบัตร ปชช. นี้
+    const foundCases = allComplaints.filter(c => c.citizenId === cid);
+    if (foundCases.length === 0) {
         noRes.style.display = 'block';
         return;
     }
+    
+    // เอาเคสที่ใหม่ที่สุด
+    const foundCase = foundCases.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
 
-    // แปลงวันที่ให้อ่านง่าย
     const dateObj = new Date(foundCase.createdAt);
     const thaiDate = `${dateObj.getDate()} / ${dateObj.getMonth() + 1} / ${dateObj.getFullYear() + 543}`;
 
-    // แสดงผลข้อมูล
     document.getElementById('r-code').textContent = foundCase.code;
     document.getElementById('r-date').textContent = 'วันที่ยื่น: ' + thaiDate;
     document.getElementById('r-subject').textContent = foundCase.description.substring(0, 80) + (foundCase.description.length > 80 ? '...' : '');
-    
-    // หมายเหตุ และ เจ้าหน้าที่
     document.getElementById('r-note').textContent = foundCase.note || 'ไม่มีบันทึกเพิ่มเติม';
-    const officerName = foundCase.assignee || 'อยู่ระหว่างมอบหมาย';
-    document.getElementById('r-officer').textContent = `ผู้รับผิดชอบ: ${officerName}`;
     
-    // สถานะ Badge
+    const officerName = foundCase.assignee || 'อยู่ระหว่างมอบหมาย';
+    const officerPhone = foundCase.assigneePhone ? ` · โทร. ${foundCase.assigneePhone}` : '';
+    document.getElementById('r-officer').textContent = `ผู้รับผิดชอบ: ${officerName}${officerPhone}`;
+    
     const badgeEl = document.getElementById('r-badge');
     if (foundCase.status === 'done') { 
         badgeEl.className = 'badge badge-done'; badgeEl.textContent = 'ปิดเรื่องแล้ว'; 
@@ -856,7 +1013,6 @@ window.searchCase = () => {
         badgeEl.className = 'badge badge-wip'; badgeEl.textContent = 'กำลังดำเนินการ'; 
     }
     
-    // ไทม์ไลน์
     const tl = document.getElementById('r-timeline');
     tl.innerHTML = STEPS.map(s => {
         const cls = s.id < foundCase.currentStep ? 'done' : s.id === foundCase.currentStep ? 'current' : '';
@@ -868,16 +1024,12 @@ window.searchCase = () => {
 };
 
 /* ─── Rendering UI ─── */
-
 function renderPendingTable() {
-    // เรียงจากใหม่ไปเก่า
     const sorted = [...allComplaints].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-    
     const badgeMap = { new:'badge-new', urgent:'badge-urgent', wip:'badge-wip', done:'badge-done' };
     const labelMap = { new:'ใหม่', urgent:'เร่งด่วน', wip:'ดำเนินการ', done:'ปิดเรื่อง' };
     
     document.getElementById('pending-tbody').innerHTML = sorted.slice(0, 10).map(r => {
-        // ประเมิน Badge คร่าวๆ
         let b = 'new';
         if(r.status === 'done') b = 'done';
         else if (r.urgency === 'urgent' && r.status !== 'done') b = 'urgent';
@@ -889,7 +1041,7 @@ function renderPendingTable() {
         return `<tr>
           <td><span class="td-muted">${r.code}</span></td>
           <td>${r.citizenName}</td>
-          <td><span style="font-size:11px;background:var(--gray-100);padding:2px 8px;border-radius:4px;color:var(--gray-700)">${r.type}</span></td>
+          <td><span style="font-size:11px;background:var(--gray-100);padding:2px 8px;border-radius:4px;color:var(--gray-700)">${r.type.substring(0, 20)}</span></td>
           <td><span class="td-muted">${dateStr}</span></td>
           <td><span class="badge ${badgeMap[b]}">${labelMap[b]}</span></td>
           <td><button class="btn-assign" onclick="window.showToast('รอเปิดหน้ารายละเอียด')">ดูข้อมูล</button></td>
@@ -902,28 +1054,37 @@ function renderPendingTable() {
 }
 
 function renderDashboard() {
-    document.getElementById('dash-date').textContent = 'อัพเดตล่าสุด: ' + new Date().toLocaleString('th-TH');
+    const dateEl = document.getElementById('dash-date');
+    if (dateEl) dateEl.textContent = 'อัพเดตล่าสุด: ' + new Date().toLocaleString('th-TH');
 
     const total = allComplaints.length;
     const unassigned = allComplaints.filter(c => c.assignee === '' && c.status !== 'done').length;
     const wip = allComplaints.filter(c => c.status === 'wip').length;
     const done = allComplaints.filter(c => c.status === 'done').length;
 
-    document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-unassigned').textContent = unassigned;
-    document.getElementById('stat-wip').textContent = wip;
-    document.getElementById('stat-done').textContent = done;
+    // อัปเดตตัวเลขหน้า Dashboard
+    const elTotal = document.getElementById('stat-total');
+    if (elTotal) elTotal.textContent = total;
+    const elUnassigned = document.getElementById('stat-unassigned');
+    if (elUnassigned) elUnassigned.textContent = unassigned;
+    const elWip = document.getElementById('stat-wip');
+    if (elWip) elWip.textContent = wip;
+    const elDone = document.getElementById('stat-done');
+    if (elDone) elDone.textContent = done;
     
-    document.getElementById('menu-badge-total').textContent = total;
-    document.getElementById('menu-badge-unassigned').textContent = unassigned;
+    // อัปเดตตัวเลข Badge ใน Sidebar ทุกหน้า
+    document.querySelectorAll('#menu-badge-total').forEach(el => el.textContent = total);
+    document.querySelectorAll('#menu-badge-unassigned').forEach(el => el.textContent = unassigned);
 
     // Alert
     const alertBox = document.getElementById('dash-alert');
-    if (unassigned > 0) {
-        alertBox.style.display = 'flex';
-        document.getElementById('dash-alert-text').textContent = `มี ${unassigned} เรื่องที่ยังไม่ได้รับมอบหมาย`;
-    } else {
-        alertBox.style.display = 'none';
+    if (alertBox) {
+        if (unassigned > 0) {
+            alertBox.style.display = 'flex';
+            document.getElementById('dash-alert-text').textContent = `มี ${unassigned} เรื่องที่ยังไม่ได้รับมอบหมาย`;
+        } else {
+            alertBox.style.display = 'none';
+        }
     }
 
     // Progress Bars
@@ -932,14 +1093,17 @@ function renderDashboard() {
         if(c.currentStep >= 1 && c.currentStep <= 5) stepCounts[c.currentStep - 1]++;
     });
     
-    document.getElementById('progress-rows').innerHTML = STEPS.map((s, index) => {
-        const count = stepCounts[index];
-        const pct = total === 0 ? 0 : Math.round((count / total) * 100);
-        return `<div class="progress-row">
-          <div class="progress-info"><span>ขั้น ${s.id} — ${s.label}</span><span class="progress-count">${count} เรื่อง</span></div>
-          <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${s.color}"></div></div>
-        </div>`;
-    }).join('');
+    const progRows = document.getElementById('progress-rows');
+    if (progRows) {
+        progRows.innerHTML = STEPS.map((s, index) => {
+            const count = stepCounts[index];
+            const pct = total === 0 ? 0 : Math.round((count / total) * 100);
+            return `<div class="progress-row">
+              <div class="progress-info"><span>ขั้น ${s.id} — ${s.label}</span><span class="progress-count">${count} เรื่อง</span></div>
+              <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${s.color}"></div></div>
+            </div>`;
+        }).join('');
+    }
 
     // Staff Workload
     const staffMap = {};
@@ -950,40 +1114,83 @@ function renderDashboard() {
         else staffMap[c.assignee].active++;
     });
 
-    document.getElementById('staff-tbody').innerHTML = Object.keys(staffMap).map(name => `
-        <tr>
-          <td>${name}</td>
-          <td style="text-align:center">${staffMap[name].active}</td>
-          <td style="text-align:center;color:var(--green)">${staffMap[name].done}</td>
-        </tr>`).join('');
-        
-    if(Object.keys(staffMap).length === 0) {
-         document.getElementById('staff-tbody').innerHTML = `<tr><td colspan="3" style="text-align:center;color:#888;">ยังไม่มีการมอบหมายงาน</td></tr>`;
+    const staffBody = document.getElementById('staff-tbody');
+    if (staffBody) {
+        staffBody.innerHTML = Object.keys(staffMap).map(name => `
+            <tr>
+              <td>${name}</td>
+              <td style="text-align:center">${staffMap[name].active}</td>
+              <td style="text-align:center;color:var(--green)">${staffMap[name].done}</td>
+            </tr>`).join('');
+            
+        if(Object.keys(staffMap).length === 0) {
+             staffBody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#888;">ยังไม่มีการมอบหมายงาน</td></tr>`;
+        }
     }
 
-    // Stale Cases (ยังไม่เสร็จ)
+    // Stale Cases
     const notDone = allComplaints.filter(c => c.status !== 'done').sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
-    document.getElementById('stale-tbody').innerHTML = notDone.slice(0, 5).map(s => {
-        const stepName = STEPS.find(st => st.id === s.currentStep)?.label || `ขั้น ${s.currentStep}`;
-        return `<tr>
-          <td class="td-muted">${s.code}</td>
-          <td>${s.citizenName}</td>
-          <td><span style="font-size:11px;background:var(--gray-100);padding:2px 8px;border-radius:4px">${stepName}</span></td>
-          <td class="td-muted">${s.assignee || '-'}</td>
-          <td><button class="btn-follow" onclick="window.showToast('ระบบติดตามยังไม่เปิดใช้งาน')">ติดตาม</button></td>
-        </tr>`;
-    }).join('');
-    
-    if(notDone.length === 0) {
-        document.getElementById('stale-tbody').innerHTML = `<tr><td colspan="5" style="text-align:center;color:#888;">ไม่มีเรื่องค้าง</td></tr>`;
+    const staleBody = document.getElementById('stale-tbody');
+    if (staleBody) {
+        staleBody.innerHTML = notDone.slice(0, 5).map(s => {
+            const stepName = STEPS.find(st => st.id === s.currentStep)?.label || `ขั้น ${s.currentStep}`;
+            return `<tr>
+              <td class="td-muted">${s.code}</td>
+              <td>${s.citizenName}</td>
+              <td><span style="font-size:11px;background:var(--gray-100);padding:2px 8px;border-radius:4px">${stepName}</span></td>
+              <td class="td-muted">${s.assignee || '-'}</td>
+              <td><button class="btn-follow" onclick="window.showToast('ระบบติดตามยังไม่เปิดใช้งาน')">ติดตาม</button></td>
+            </tr>`;
+        }).join('');
+        
+        if(notDone.length === 0) {
+            staleBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#888;">ไม่มีเรื่องค้าง</td></tr>`;
+        }
     }
 }
 
 /* ─── UI Helpers ─── */
-window.goPage = (id) => {
+
+// จัดการการเปลี่ยนหน้าเว็บ
+window.goPage = (id, el) => {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
+
+  // ถ้ามีการกดจาก Sidebar ให้เปลี่ยนแถบสี Active ด้วย
+  if (el && el.classList.contains('sidebar-item')) {
+      document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+      
+      // อัปเดต Sidebar ในหน้าอื่นๆ ให้ตรงกัน
+      const index = Array.from(el.parentNode.children).indexOf(el);
+      document.querySelectorAll('.admin-sidebar').forEach(sidebar => {
+          if(sidebar.children[index]) {
+              sidebar.children[index].classList.add('active');
+          }
+      });
+  }
+}
+
+// ตรวจสอบประเภท "อื่นๆ"
+window.toggleTypeOther = () => {
+    const typeSelect = document.getElementById('req-type');
+    const otherInput = document.getElementById('req-type-other');
+    if (typeSelect.value === 'other') {
+        otherInput.style.display = 'block';
+        otherInput.focus();
+    } else {
+        otherInput.style.display = 'none';
+        otherInput.value = '';
+    }
+}
+
+// ระบบดึงเบอร์โทรอัตโนมัติ
+window.autoFillOfficerPhone = () => {
+    const name = document.getElementById('req-assignee').value;
+    const phoneInput = document.getElementById('req-assignee-phone');
+    if (knownOfficers[name]) {
+        phoneInput.value = knownOfficers[name]; // ดึงเบอร์จากระบบ
+    }
 }
 
 window.buildStepRow = () => {
@@ -1022,13 +1229,16 @@ window.clearForm = () => {
     document.getElementById('req-name').value = '';
     document.getElementById('req-cid').value = '';
     document.getElementById('req-phone').value = '';
+    document.getElementById('req-type').selectedIndex = 0;
+    window.toggleTypeOther(); // ซ่อนช่องอื่นๆ
     document.getElementById('req-desc').value = '';
     document.getElementById('req-drive').value = '';
     document.getElementById('req-assignee').value = '';
+    document.getElementById('req-assignee-phone').value = '';
     document.getElementById('req-note').value = '';
     selectedStep = 1;
     currentUrgency = 'normal';
-    window.buildStepRow(); // รีเซ็ตปุ่ม step
+    window.buildStepRow();
     
     const urgBtns = document.querySelectorAll('.urgency-btn');
     urgBtns[0].classList.add('selected-normal');
@@ -1036,8 +1246,11 @@ window.clearForm = () => {
 }
 
 /* ─── Init ─── */
+// นำ Sidebar ไปใส่ในทุกหน้า Admin
+document.querySelectorAll('.admin-sidebar').forEach(el => el.innerHTML = sidebarHTML);
+
 window.buildStepRow();
-initAuth(); // เริ่มต้นการเชื่อมต่อ Firebase ทันทีที่โหลดหน้าเว็บ
+initAuth(); 
 </script>
 </body>
 </html>
