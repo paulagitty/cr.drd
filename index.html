@@ -366,7 +366,7 @@ tr:hover td { background: var(--gray-50); }
 }
 .modal-overlay.show { display: flex; animation: fadeIn .2s; }
 .modal-content {
-  background: var(--white); width: 100%; max-width: 600px; border-radius: var(--r-lg);
+  background: var(--white); width: 100%; max-width: 650px; border-radius: var(--r-lg);
   box-shadow: var(--shadow-md); display: flex; flex-direction: column;
   max-height: 90vh;
 }
@@ -397,21 +397,35 @@ tr:hover td { background: var(--gray-50); }
 
 /* Timeline History in Modal */
 .history-timeline {
-  border-left: 2px solid var(--border);
-  margin-left: 8px; padding-left: 16px;
-  display: flex; flex-direction: column; gap: 1rem;
+  display: flex; flex-direction: column;
 }
-.history-item { position: relative; }
+.history-item {
+  position: relative;
+  padding-left: 20px;
+  border-left: 2px solid var(--border);
+  padding-bottom: 15px;
+}
+.history-item:last-child {
+  border-left: 2px solid transparent; /* Hide border for last item */
+}
 .history-item::before {
-  content: ''; position: absolute; left: -22px; top: 4px;
-  width: 10px; height: 10px; border-radius: 50%;
+  content: ''; position: absolute; left: -7px; top: 2px;
+  width: 12px; height: 12px; border-radius: 50%;
   background: var(--green); border: 2px solid var(--white);
   box-shadow: 0 0 0 1px var(--green);
 }
-.hi-date { font-size: 11px; color: var(--gray-500); margin-bottom: 2px; }
-.hi-step { font-size: 12px; font-weight: 600; color: var(--gray-900); margin-bottom: 4px; }
-.hi-note { font-size: 13px; color: var(--gray-700); background: var(--gray-50); padding: 8px 12px; border-radius: var(--r-sm); margin-bottom: 4px; line-height: 1.4; white-space: pre-wrap; }
-.hi-officer { font-size: 11px; color: var(--orange); font-weight: 500; }
+.hi-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 6px; line-height: 1.2;
+}
+.hi-step { font-size: 13px; font-weight: 600; color: var(--green); }
+.hi-date { font-size: 11px; color: var(--gray-500); }
+.hi-note {
+  font-size: 13px; color: var(--gray-900); background: var(--gray-50); 
+  padding: 10px 12px; border-radius: var(--r-sm); margin-bottom: 6px; 
+  line-height: 1.5; white-space: pre-wrap; border: 1px solid var(--border);
+}
+.hi-officer { font-size: 11px; color: var(--gray-500); font-weight: 500; display:flex; align-items:center; gap:4px; }
 
 /* Custom Confirm Modal */
 #confirm-modal .modal-content { max-width: 400px; text-align: center; padding-top: 2rem; }
@@ -454,10 +468,14 @@ tr:hover td { background: var(--gray-50); }
   .print-table th { background-color: #f5f5f5; width: 130px; font-weight: bold; }
   
   .print-history { border-left: 2px solid #ccc; margin-left: 5px; padding-left: 15px; }
-  .print-history-item { margin-bottom: 12px; }
+  
+  /* ป้องกันการถูกตัดครึ่งหน้าสำหรับแต่ละข้อประวัติ */
+  .print-history-item { margin-bottom: 15px; page-break-inside: avoid; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+  .print-history-item:last-child { border-bottom: none; }
+  
   .print-hi-head { font-weight: bold; font-size: 13px; }
-  .print-hi-date { font-size: 11px; color: #666; }
-  .print-hi-note { font-size: 13px; margin-top: 4px; padding-left: 10px; border-left: 2px solid #eee; white-space: pre-wrap; }
+  .print-hi-date { font-size: 11px; color: #666; font-weight: normal;}
+  .print-hi-note { font-size: 13px; margin-top: 4px; padding-left: 10px; border-left: 2px solid #ddd; white-space: pre-wrap; line-height: 1.5;}
 }
 
 #print-container { display: none; }
@@ -676,7 +694,7 @@ const sidebarHTML = `
         </div>
         <div style="margin-top:.75rem">
           <label class="form-label">บันทึกรายละเอียดการดำเนินการ (Log)</label>
-          <textarea id="req-note" class="form-textarea" style="min-height:56px" placeholder="เช่น รับเรื่องเข้าระบบ พร้อมรับเอกสารประกอบ..."></textarea>
+          <textarea id="req-note" class="form-textarea" style="min-height:56px" placeholder="เช่น รับเรื่องเข้าระบบ พร้อมรับเอกสารประกอบคำร้องเบื้องต้น..."></textarea>
         </div>
       </div>
 
@@ -889,11 +907,11 @@ const sidebarHTML = `
       <div class="form-card">
         <div class="form-section-title">เครื่องมือสำหรับนักพัฒนา</div>
         <p style="font-size: 13px; color: var(--gray-700); margin-bottom: 1rem;">
-          ปุ่มด้านล่างนี้จะทำการสร้างเรื่องร้องเรียนจำลองจำนวน 20 เคส เข้าสู่ฐานข้อมูล Firebase ของคุณอัตโนมัติ 
-          เพื่อช่วยให้คุณเห็นภาพรวมของหน้า Dashboard และตารางต่างๆ ได้ชัดเจนยิ่งขึ้น
+          ปุ่มด้านล่างนี้จะทำการสร้างเรื่องร้องเรียนจำลองจำนวน 20 เคส เข้าสู่ฐานข้อมูล Firebase ของคุณอัตโนมัติ <br>
+          <strong style="color:var(--green)">* เวอร์ชันนี้: ข้อมูลจำลองจะถูกสร้างให้มี "ประวัติย้อนหลัง (Timeline)" ครบทุกขั้นตอนเพื่อทดสอบการพิมพ์เอกสาร</strong>
         </p>
         <button id="btn-gen-mock" class="btn-save" style="background: var(--orange);" onclick="generateMockData()">
-          ⚡ สร้างข้อมูลจำลอง 20 เคส
+          ⚡ สร้างข้อมูลจำลอง 20 เคส (พร้อมประวัติ)
         </button>
       </div>
     </main>
@@ -925,9 +943,9 @@ const sidebarHTML = `
       <div id="m-drive-container"></div>
 
       <!-- 2. ประวัติการดำเนินการ (Timeline History) -->
-      <div class="form-section-title" style="margin-top:2rem">ประวัติการดำเนินการ</div>
+      <div class="form-section-title" style="margin-top:2rem">ประวัติการดำเนินการ (Timeline)</div>
       <div id="m-history-list" class="history-timeline">
-        <!-- ข้อมูลประวัติการทำงานจะถูกแทรกที่นี่ -->
+        <!-- ข้อมูลประวัติการทำงานจะถูกแทรกที่นี่แบบล่าสุดอยู่บนสุด -->
       </div>
       
       <!-- 3. ส่วนสำหรับเจ้าหน้าที่ (เพิ่มอัปเดตใหม่) -->
@@ -943,14 +961,14 @@ const sidebarHTML = `
             <option value="1">1. รับเรื่อง</option>
             <option value="2">2. ตรวจสอบเบื้องต้น</option>
             <option value="3">3. นัดไกล่เกลี่ย</option>
-            <option value="4">4. แจ้งผล</option>
+            <option value="4">4. แจ้งผลการพิจารณา</option>
             <option value="5">5. ปิดเรื่อง</option>
           </select>
         </div>
         <div class="form-group" style="margin-bottom:10px;">
           <label class="form-label">บันทึกการดำเนินการ (Log)</label>
           <textarea id="m-note" class="form-textarea" style="min-height:80px; border-color:var(--orange);" placeholder="พิมพ์รายละเอียดสิ่งที่ได้ดำเนินการไป..."></textarea>
-          <div style="font-size:11px; color:var(--gray-500); margin-top:5px;">* การบันทึกนี้จะถูกจัดเก็บเป็นประวัติ ไม่สามารถลบได้</div>
+          <div style="font-size:11px; color:var(--gray-500); margin-top:5px;">* การบันทึกนี้จะถูกจัดเก็บเรียงเป็นประวัติ Timeline ไม่สามารถลบได้</div>
         </div>
       </div>
       
@@ -962,7 +980,7 @@ const sidebarHTML = `
       </div>
       <div style="display:flex; gap:10px;">
         <button class="btn-cancel" onclick="printCase()">🖨️ พิมพ์เอกสาร</button>
-        <button class="btn-cancel" onclick="closeModal()">ปิด</button>
+        <button class="btn-cancel" onclick="closeModal()">ปิดหน้าต่าง</button>
         <button class="btn-save" id="btn-update-case" onclick="updateCaseDetails()">บันทึกอัปเดตใหม่</button>
       </div>
     </div>
@@ -985,7 +1003,7 @@ const sidebarHTML = `
 </div>
 
 <!-- ═══════════════════════════════════════════
-     PRINT CONTAINER (ซ่อนไว้สำหรับดึงไปปริ้น)
+     PRINT CONTAINER (ซ่อนไว้สำหรับดึงไปปริ้น A4)
 ═══════════════════════════════════════════ -->
 <div id="print-container">
   <div class="print-header">
@@ -1016,7 +1034,7 @@ const sidebarHTML = `
   <div class="print-section" style="margin-top:20px;">
     <div class="print-section-title">ประวัติการดำเนินการติดตามเรื่อง</div>
     <div id="p-history-list" class="print-history">
-      <!-- ข้อมูลประวัติจะถูกแทรกที่นี่ -->
+      <!-- ข้อมูลประวัติจะถูกแทรกที่นี่ เรียงจากเก่าสุดไปล่าสุด -->
     </div>
   </div>
 </div>
@@ -1167,7 +1185,7 @@ window.saveCase = async () => {
     const initialHistory = [{
         date: new Date().toISOString(),
         step: selectedStep,
-        note: note || "รับเรื่องเข้าสู่ระบบ",
+        note: note || "รับเรื่องร้องเรียนเข้าสู่ระบบ พร้อมตรวจสอบรายละเอียดคำร้อง",
         officer: assignee || "แอดมินระบบ"
     }];
 
@@ -1201,13 +1219,13 @@ window.updateCaseDetails = async () => {
     const newStep = parseInt(document.getElementById('m-step').value);
     const newNote = document.getElementById('m-note').value.trim();
     
-    if (!newNote) return window.showToast("กรุณากรอกบันทึกการดำเนินการ (Log) ด้วยครับ");
+    if (!newNote) return window.showToast("กรุณากรอกบันทึกการดำเนินการ (Log) ด้วยครับ เพื่อเก็บเป็นประวัติ");
 
     // ดึงประวัติเดิมมาเพื่อเพิ่มต่อท้าย
     const existingCase = allComplaints.find(x => x.id === docId);
     let newHistory = existingCase.history ? [...existingCase.history] : [];
     
-    // ดึงค่า note เก่า (ถ้ามีและยังไม่มีในประวัติ จะได้ไม่หาย)
+    // ดึงค่า note เก่า (เผื่อระบบเก่าที่ยังไม่มีประวัติ)
     if (existingCase.note && newHistory.length === 0) {
         newHistory.push({ date: existingCase.createdAt, step: existingCase.currentStep, note: existingCase.note, officer: existingCase.assignee || 'แอดมินระบบ' });
     }
@@ -1236,10 +1254,10 @@ window.updateCaseDetails = async () => {
             assignee: newAssignee,
             assigneePhone: assigneePhone,
             currentStep: newStep,
-            history: newHistory, // บันทึกประวัติชุดใหม่
+            history: newHistory, // บันทึกประวัติชุดใหม่เข้าไปแทนที่
             status: newStatus
         });
-        window.showToast("อัปเดตความคืบหน้าสำเร็จ ✓");
+        window.showToast("อัปเดตความคืบหน้าและประวัติสำเร็จ ✓");
         window.closeModal();
     } catch (error) {
         console.error("Update Error:", error);
@@ -1272,7 +1290,7 @@ window.executeDelete = async () => {
     }
 };
 
-/* ─── 7. สร้างข้อมูลจำลองแบบมี History (Mock Data) ─── */
+/* ─── 7. สร้างข้อมูลจำลองแบบมี History ครบทุกขั้นตอน (Mock Data) ─── */
 window.generateMockData = async () => {
     if (!currentUser) return window.showToast("กรุณารอระบบเชื่อมต่อสักครู่");
     const btn = document.getElementById('btn-gen-mock');
@@ -1298,36 +1316,36 @@ window.generateMockData = async () => {
             const pastDate = new Date();
             pastDate.setDate(pastDate.getDate() - Math.floor(Math.random() * 60));
 
-            // สร้าง History หลายๆ ขั้น
+            // สร้าง History ตั้งแต่ขั้นตอนที่ 1 ไปจนถึง finalStep เรียงตามลำดับเวลา
             let mockHistory = [];
-            mockHistory.push({
-                date: pastDate.toISOString(), step: 1, 
-                note: "รับเรื่องร้องเรียนผ่านระบบออนไลน์ พร้อมรับเอกสารประกอบคำร้องเบื้องต้น", 
-                officer: "แอดมินระบบ"
-            });
-            
-            if (finalStep >= 2) {
-                let d2 = new Date(pastDate); d2.setDate(d2.getDate() + 2);
+            let currDate = new Date(pastDate);
+
+            for (let s = 1; s <= finalStep; s++) {
+                let noteStr = "";
+                let officer = (s === 1) ? "แอดมินระบบ" : (assigneeName || "เจ้าหน้าที่");
+                
+                if (s === 1) noteStr = "รับเรื่องร้องเรียนผ่านระบบออนไลน์ พร้อมตรวจสอบเอกสารประกอบคำร้องเบื้องต้น";
+                else if (s === 2) noteStr = "ลงพื้นที่ตรวจสอบข้อเท็จจริงเบื้องต้น สอบถามพยานแวดล้อมและรวบรวมหลักฐานเพิ่มเติม";
+                else if (s === 3) noteStr = "ส่งหนังสือเชิญคู่กรณีทั้งสองฝ่ายมาเจรจาไกล่เกลี่ย ณ ศูนย์ดำรงธรรม";
+                else if (s === 4) noteStr = "แจ้งผลการพิจารณาให้ผู้ร้องทราบผ่านทางโทรศัพท์และจดหมายลงทะเบียนเรียบร้อย";
+                else if (s === 5) noteStr = "ยุติเรื่องร้องเรียน คู่กรณีตกลงกันได้และลงลายมือชื่อในบันทึกข้อตกลงเป็นที่เรียบร้อย";
+
                 mockHistory.push({
-                    date: d2.toISOString(), step: 2, 
-                    note: `ลงพื้นที่ตรวจสอบข้อเท็จจริงเบื้องต้น สอบถามพยานแวดล้อมและรวบรวมหลักฐานเพิ่มเติม`, 
-                    officer: assigneeName
+                    date: currDate.toISOString(), 
+                    step: s, 
+                    note: noteStr, 
+                    officer: officer
                 });
-            }
-            if (finalStep >= 3) {
-                let d3 = new Date(pastDate); d3.setDate(d3.getDate() + 7);
-                mockHistory.push({
-                    date: d3.toISOString(), step: 3, 
-                    note: `ส่งหนังสือเชิญคู่กรณีทั้งสองฝ่ายมาเจรจาไกล่เกลี่ย ณ ศูนย์ดำรงธรรม ในวันที่ ${d3.getDate()+5}/${d3.getMonth()+1}/${d3.getFullYear()+543}`, 
-                    officer: assigneeName
-                });
+                
+                // ขยับเวลาไปข้างหน้า 1-5 วันสำหรับการอัปเดตครั้งต่อไป
+                currDate.setDate(currDate.getDate() + Math.floor(Math.random() * 5) + 1);
             }
 
             const newCase = {
                 code: caseCode, citizenId: cid, citizenName: mockNames[i % mockNames.length] + " (จำลอง)",
                 phone: "08" + Math.floor(Math.random()*100000000).toString().padStart(8, '0'),
                 type: mockTypes[i % mockTypes.length],
-                description: "ข้อร้องเรียนจำลองลำดับที่ " + i + " เพื่อทดสอบระบบหน้า Dashboard และการปริ้นรายงาน\n\nผู้ร้องขอความช่วยเหลือให้ติดตามการดำเนินงานของหน่วยงานที่เกี่ยวข้อง",
+                description: "ข้อร้องเรียนจำลองลำดับที่ " + i + " เพื่อทดสอบระบบหน้า Dashboard และการปริ้นรายงาน\n\nผู้ร้องขอความช่วยเหลือให้ติดตามการดำเนินงานของหน่วยงานที่เกี่ยวข้องอย่างใกล้ชิด",
                 driveLink: "", assignee: assigneeName, assigneePhone: assigneePhone,
                 urgency: Math.random() > 0.8 ? "urgent" : "normal", currentStep: finalStep,
                 history: mockHistory, status: status,
@@ -1335,12 +1353,12 @@ window.generateMockData = async () => {
             };
             await addDoc(complaintsRef, newCase);
         }
-        window.showToast("สร้างข้อมูลจำลอง 20 เคสพร้อมประวัติ สำเร็จ!");
+        window.showToast("สร้างข้อมูลจำลอง 20 เคสพร้อมประวัติ Timeline สำเร็จ!");
     } catch (error) {
         console.error("Mock Gen Error:", error);
         window.showToast("เกิดข้อผิดพลาดในการสร้างข้อมูล");
     } finally {
-        btn.disabled = false; btn.textContent = "⚡ สร้างข้อมูลจำลอง 20 เคส";
+        btn.disabled = false; btn.textContent = "⚡ สร้างข้อมูลจำลอง 20 เคส (พร้อมประวัติ)";
     }
 };
 
@@ -1394,7 +1412,7 @@ window.searchCase = () => {
     card.style.display = 'block';
 };
 
-/* ─── 9. เปิดหน้าต่าง Modal อัปเดตและแสดงประวัติ ─── */
+/* ─── 9. เปิดหน้าต่าง Modal อัปเดตและแสดงประวัติ Timeline ─── */
 window.openCaseDetails = (docId) => {
     const c = allComplaints.find(x => x.id === docId);
     if(!c) return window.showToast('ไม่พบข้อมูล');
@@ -1418,34 +1436,35 @@ window.openCaseDetails = (docId) => {
     const hisDiv = document.getElementById('m-history-list');
     let historyData = c.history ? [...c.history] : [];
     
-    // ถ้าเคสเก่ามีแค่ note เดียว ให้แปลงเป็นประวัติ 1 อัน
     if (historyData.length === 0 && c.note) {
         historyData.push({ date: c.createdAt, step: c.currentStep, note: c.note, officer: c.assignee || 'แอดมิน' });
     }
 
     if (historyData.length > 0) {
-        // เรียงจากเก่าไปใหม่เพื่อแสดงแบบ Timeline
-        historyData.sort((a,b) => new Date(a.date) - new Date(b.date));
+        // เรียงจากใหม่ไปเก่า (ล่าสุดอยู่บนสุด) สำหรับหน้าจอ Modal จะได้ไม่ต้องเลื่อนหา
+        historyData.sort((a,b) => new Date(b.date) - new Date(a.date));
         hisDiv.innerHTML = historyData.map(h => {
             const hd = new Date(h.date);
             const dateStr = `${hd.getDate()}/${hd.getMonth()+1}/${hd.getFullYear()+543} เวลา ${String(hd.getHours()).padStart(2,'0')}:${String(hd.getMinutes()).padStart(2,'0')} น.`;
             const stepLabel = STEPS.find(s => s.id === h.step)?.label || `ขั้นตอน ${h.step}`;
             return `
             <div class="history-item">
-              <div class="hi-date">${dateStr}</div>
-              <div class="hi-step">ขั้นที่ ${h.step} : ${stepLabel}</div>
+              <div class="hi-header">
+                <div class="hi-step">ขั้นที่ ${h.step} : ${stepLabel}</div>
+                <div class="hi-date">${dateStr}</div>
+              </div>
               <div class="hi-note">${h.note}</div>
-              <div class="hi-officer">ผู้บันทึก: ${h.officer}</div>
+              <div class="hi-officer">👤 ผู้บันทึก: <span style="color:var(--orange)">${h.officer}</span></div>
             </div>`;
         }).join('');
     } else {
         hisDiv.innerHTML = `<span style="font-size:13px; color:var(--gray-500)">ยังไม่มีประวัติการดำเนินการ</span>`;
     }
 
-    // เตรียมฟอร์มอัปเดตใหม่ (เคลียร์ค่าเก่าออก)
+    // เตรียมฟอร์มอัปเดตใหม่
     document.getElementById('m-assignee').value = c.assignee || "";
     document.getElementById('m-step').value = c.currentStep;
-    document.getElementById('m-note').value = ""; // เคลียร์ช่องเตรียมให้พิมพ์อัปเดตใหม่
+    document.getElementById('m-note').value = ""; 
 
     document.getElementById('case-modal').classList.add('show');
 };
@@ -1454,7 +1473,7 @@ window.closeModal = () => {
     document.getElementById('case-modal').classList.remove('show');
 };
 
-/* ─── 10. ระบบ Print เอกสาร A4 ─── */
+/* ─── 10. ระบบ Print เอกสาร A4 (แสดงประวัติครบทุกขั้นตอน) ─── */
 window.printCase = () => {
     const docId = document.getElementById('m-docId').value;
     const c = allComplaints.find(x => x.id === docId);
@@ -1477,6 +1496,7 @@ window.printCase = () => {
     }
 
     if (historyData.length > 0) {
+        // เรียงจากเก่าไปใหม่ (บนลงล่าง) สำหรับหน้ากระดาษ Print
         historyData.sort((a,b) => new Date(a.date) - new Date(b.date));
         pHisList.innerHTML = historyData.map(h => {
             const hd = new Date(h.date);
