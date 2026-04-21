@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ศูนย์ดำรงธรรม — ระบบรับเรื่องร้องเรียน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & Base ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green:       #0B6B4A;
+  --green-mid:   #1D9E75;
+  --green-light: #D6F0E6;
+  --green-pale:  #F0FAF5;
+  --orange:      #C85A1E;
+  --orange-light:#FEF0E6;
+  --amber:       #B86A00;
+  --amber-light: #FEF5E0;
+  --red:         #B22222;
+  --red-light:   #FEE8E8;
+  --gray-900:    #1A1A1A;
+  --gray-700:    #3D3D3D;
+  --gray-500:    #6B6B6B;
+  --gray-300:    #C0C0C0;
+  --gray-100:    #F4F4F2;
+  --gray-50:     #FAFAF8;
+  --white:       #FFFFFF;
+  --border:      #E2E2DE;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:   0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.05);
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --font: 'IBM Plex Sans Thai', 'Sarabun', sans-serif;
+}
+
+html { font-size: 15px; }
+body {
+  font-family: var(--font);
+  background: var(--gray-50);
+  color: var(--gray-900);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── Shared Layout ─── */
+.page { display: none; min-height: 100vh; }
+.page.active { display: flex; flex-direction: column; }
+
+/* ─── NAV ─── */
+.topnav {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 56px;
+  position: sticky; top: 0; z-index: 100;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 600; font-size: 14px; color: var(--gray-900);
+  text-decoration: none;
+}
+.brand-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--green); display: flex; align-items: center;
+  justify-content: center; color: var(--white); font-size: 13px; font-weight: 600;
+  flex-shrink: 0;
+}
+.nav-sep { flex: 1; }
+.nav-btn {
+  padding: 6px 14px; border-radius: var(--r-sm); font-size: 13px;
+  font-family: var(--font); cursor: pointer; font-weight: 500;
+  transition: background .15s, color .15s;
+}
+.nav-btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--gray-700); }
+.nav-btn.ghost:hover { background: var(--gray-100); }
+.nav-btn.solid { background: var(--green); border: 1px solid var(--green); color: var(--white); }
+.nav-btn.solid:hover { background: var(--green-mid); }
+
+/* ─── PUBLIC PAGE ─── */
+#page-public {
+  background: linear-gradient(160deg, var(--green-pale) 0%, var(--gray-50) 60%);
+}
+.public-hero {
+  padding: 4rem 2rem 2rem;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--green-light); color: var(--green); border-radius: 999px;
+  padding: 4px 14px; font-size: 12px; font-weight: 500; margin-bottom: 1.25rem;
+}
+.hero-title { font-size: 2rem; font-weight: 600; color: var(--gray-900); margin-bottom: .5rem; }
+.hero-sub { font-size: 14px; color: var(--gray-500); margin-bottom: 2.5rem; }
+
+.search-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 2rem;
+  max-width: 500px; margin: 0 auto;
+  box-shadow: var(--shadow-md);
+}
+.field-label { font-size: 12px; font-weight: 500; color: var(--gray-500); margin-bottom: 5px; letter-spacing: .03em; text-transform: uppercase; }
+.field-row { display: flex; gap: 8px; }
+.input-text {
+  flex: 1; height: 42px; padding: 0 12px;
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  font-family: var(--font); font-size: 14px; color: var(--gray-900);
+  background: var(--gray-50); transition: border .15s, box-shadow .15s;
+  letter-spacing: .06em;
+}
+.input-text:focus { outline: none; border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(29,158,117,.12); background: var(--white); }
+.btn-search {
+  height: 42px; padding: 0 20px; background: var(--green); color: var(--white);
+  border: none; border-radius: var(--r-sm); font-family: var(--font); font-size: 14px;
+  font-weight: 500; cursor: pointer; transition: background .15s; white-space: nowrap;
+}
+.btn-search:hover { background: var(--green-mid); }
+.helper-text { font-size: 11px; color: var(--gray-500); margin-top: 5px; }
+
+/* Result card */
+.result-area { margin-top: 1.5rem; display: none; }
+.result-case {
+  border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden;
+  animation: slideIn .25s ease;
+  text-align: left;
+}
+@keyframes slideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+.case-header {
+  padding: .9rem 1.1rem;
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--gray-50); border-bottom: 1px solid var(--border);
+}
+.case-id { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+.case-date { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+.case-body { padding: 1rem 1.1rem; }
+.case-subject { font-size: 13px; color: var(--gray-700); margin-bottom: 1.1rem; }
+
+/* Timeline */
+.timeline { display: flex; align-items: flex-start; gap: 0; margin: .5rem 0 .75rem; }
+.tl-step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+.tl-step:not(:last-child)::after {
+  content: ''; position: absolute; top: 13px; left: 50%; width: 100%; height: 2px;
+  background: var(--border); z-index: 0;
+}
+.tl-step.done:not(:last-child)::after { background: var(--green-mid); }
+.tl-dot {
+  width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border);
+  background: var(--white); display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600; position: relative; z-index: 1;
+  transition: all .2s;
+}
+.tl-step.done .tl-dot { background: var(--green-mid); border-color: var(--green-mid); color: var(--white); }
+.tl-step.current .tl-dot { background: var(--orange); border-color: var(--orange); color: var(--white); }
+.tl-name { font-size: 10px; color: var(--gray-500); margin-top: 5px; text-align: center; }
+.tl-step.done .tl-name { color: var(--green); }
+.tl-step.current .tl-name { color: var(--orange); font-weight: 500; }
+
+.case-note {
+  background: var(--green-pale); border: 1px solid var(--green-light);
+  border-radius: var(--r-sm); padding: .65rem .9rem;
+  font-size: 12px; color: var(--green); margin-bottom: .75rem;
+}
+.case-officer { font-size: 11px; color: var(--gray-500); }
+.no-result { text-align: center; padding: 1.5rem; color: var(--gray-500); font-size: 13px; display: none; }
+
+/* ─── ADMIN PAGE ─── */
+.admin-layout { display: flex; flex: 1; }
+.sidebar {
+  width: 210px; background: var(--white); border-right: 1px solid var(--border);
+  padding: 1rem 0; flex-shrink: 0; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto;
+}
+.sidebar-section { padding: 1rem 1rem .4rem; font-size: 10px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: .06em; }
+.sidebar-item {
+  display: flex; align-items: center; gap: 9px; padding: 7px 1rem;
+  font-size: 13px; color: var(--gray-700); cursor: pointer; border-left: 3px solid transparent;
+  transition: all .12s;
+}
+.sidebar-item:hover { background: var(--gray-50); color: var(--gray-900); }
+.sidebar-item.active { background: var(--green-pale); color: var(--green); border-left-color: var(--green); font-weight: 500; }
+.sidebar-item .icon { font-size: 14px; width: 18px; text-align: center; }
+.badge-count {
+  margin-left: auto; background: var(--orange-light); color: var(--orange);
+  border-radius: 999px; padding: 1px 7px; font-size: 10px; font-weight: 600;
+}
+
+.admin-main { flex: 1; padding: 1.75rem; overflow-y: auto; }
+.page-title { font-size: 18px; font-weight: 600; margin-bottom: .25rem; }
+.page-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 1.5rem; }
+
+.form-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 1.5rem; margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+.form-section-title {
+  font-size: 11px; font-weight: 600; color: var(--gray-500);
+  text-transform: uppercase; letter-spacing: .05em; margin-bottom: 1rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-group { display: flex; flex-direction: column; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 12px; font-weight: 500; color: var(--gray-700); margin-bottom: 4px; }
+.form-input, .form-select, .form-textarea {
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r-sm);
+  font-family: var(--font); font-size: 13px; color: var(--gray-900); background: var(--white);
+  transition: border .15s, box-shadow .15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none; border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(29,158,117,.1);
+}
+.form-textarea { resize: vertical; min-height: 80px; }
+.drive-row { display: flex; gap: 8px; }
+.drive-row .form-input { flex: 1; }
+.btn-drive {
+  padding: 8px 12px; background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r-sm); font-family: var(--font); font-size: 12px;
+  color: var(--gray-700); cursor: pointer; white-space: nowrap;
+  transition: background .12s;
+}
+.btn-drive:hover { background: var(--gray-100); }
+
+/* Urgency buttons */
+.urgency-row { display: flex; gap: 8px; }
+.urgency-btn {
+  padding: 7px 16px; border-radius: var(--r-sm); font-family: var(--font);
+  font-size: 12px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--border);
+  background: var(--white); color: var(--gray-700); transition: all .12s;
+}
+.urgency-btn:hover { border-color: var(--gray-300); background: var(--gray-50); }
+.urgency-btn.selected-normal { border-color: var(--green); background: var(--green-pale); color: var(--green); }
+.urgency-btn.selected-urgent { border-color: var(--orange); background: var(--orange-light); color: var(--orange); }
+
+/* Step update */
+.step-select-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.step-option {
+  padding: 6px 14px; border-radius: 999px; font-size: 12px;
+  border: 1.5px solid var(--border); cursor: pointer; font-family: var(--font);
+  background: var(--white); color: var(--gray-700); transition: all .12s; font-weight: 500;
+}
+.step-option:hover { border-color: var(--green-mid); color: var(--green); }
+.step-option.active { background: var(--green); border-color: var(--green); color: var(--white); }
+
+/* Form actions */
+.form-actions { display: flex; gap: 10px; margin-top: 1.25rem; }
+.btn-save {
+  padding: 9px 22px; background: var(--green); color: var(--white);
+  border: none; border-radius: var(--r-sm); font-family: var(--font);
+  font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s;
+}
+.btn-save:hover { background: var(--green-mid); }
+.btn-save:disabled { background: var(--gray-300); cursor: not-allowed; }
+.btn-cancel {
+  padding: 9px 18px; background: transparent; color: var(--gray-700);
+  border: 1px solid var(--border); border-radius: var(--r-sm); font-family: var(--font);
+  font-size: 13px; cursor: pointer; transition: background .15s;
+}
+.btn-cancel:hover { background: var(--gray-100); }
+
+/* Pending table */
+.table-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.table-head { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+.table-head-title { font-size: 14px; font-weight: 600; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 600; color: var(--gray-500); background: var(--gray-50); text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--gray-900); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--gray-50); }
+.td-muted { font-size: 11px; color: var(--gray-500); }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+.badge-new { background: var(--green-light); color: var(--green); }
+.badge-wip { background: var(--amber-light); color: var(--amber); }
+.badge-done { background: #EAF3DE; color: #3B6D11; }
+.badge-urgent { background: var(--red-light); color: var(--red); }
+
+.btn-assign {
+  padding: 4px 10px; font-size: 11px; font-family: var(--font); cursor: pointer;
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--r-sm);
+  color: var(--gray-700); transition: all .12s;
+}
+.btn-assign:hover { background: var(--green-pale); border-color: var(--green-mid); color: var(--green); }
+
+/* ─── DASHBOARD PAGE ─── */
+.dash-main { flex: 1; padding: 1.75rem; overflow-y: auto; }
+.dash-topbar { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; }
+.dash-title { font-size: 18px; font-weight: 600; }
+.month-select { padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); font-family: var(--font); font-size: 13px; background: var(--white); cursor: pointer; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.25rem; }
+.stat-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--r-md);
+  padding: 1rem 1.1rem; box-shadow: var(--shadow-sm);
+}
+.stat-label { font-size: 11px; color: var(--gray-500); font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
+.stat-num { font-size: 28px; font-weight: 600; margin-top: 4px; color: var(--gray-900); line-height: 1.1; }
+.stat-sub { font-size: 11px; color: var(--gray-500); margin-top: 3px; }
+.stat-card.accent-green { border-top: 3px solid var(--green); }
+.stat-card.accent-orange { border-top: 3px solid var(--orange); }
+.stat-card.accent-amber { border-top: 3px solid var(--amber); }
+.stat-card.accent-gray { border-top: 3px solid var(--gray-300); }
+.stat-num.green { color: var(--green); }
+.stat-num.orange { color: var(--orange); }
+.stat-num.amber { color: var(--amber); }
+
+.dash-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+.dash-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 1.25rem; box-shadow: var(--shadow-sm);
+}
+.dash-card-title { font-size: 13px; font-weight: 600; margin-bottom: 1rem; color: var(--gray-900); }
+
+/* Progress bars */
+.progress-row { margin-bottom: 12px; }
+.progress-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--gray-700); margin-bottom: 5px; }
+.progress-count { color: var(--gray-500); }
+.progress-track { height: 7px; background: var(--gray-100); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 999px; transition: width .6s ease; }
+
+/* Alert banner */
+.alert-banner {
+  background: var(--orange-light); border: 1px solid rgba(200,90,30,.2);
+  border-radius: var(--r-md); padding: .75rem 1rem;
+  display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem;
+}
+.alert-icon { font-size: 16px; }
+.alert-text { font-size: 13px; color: var(--orange); font-weight: 500; }
+.alert-sub { font-size: 11px; color: var(--orange); opacity: .8; }
+
+.btn-follow {
+  padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: var(--font);
+  background: var(--amber-light); border: 1px solid rgba(184,106,0,.2);
+  border-radius: var(--r-sm); color: var(--amber); font-weight: 500; transition: all .12s;
+}
+.btn-follow:hover { background: var(--amber); color: var(--white); }
+
+/* ─── Toast ─── */
+.toast {
+  position: fixed; bottom: 2rem; right: 2rem; background: var(--gray-900);
+  color: var(--white); padding: .75rem 1.25rem; border-radius: var(--r-md);
+  font-size: 13px; box-shadow: var(--shadow-md); z-index: 999;
+  transform: translateY(100px); opacity: 0; transition: all .3s ease;
+}
+.toast.show { transform: none; opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: PUBLIC — ตรวจสอบสถานะ
+═══════════════════════════════════════════ -->
+<div id="page-public" class="page active">
+  <nav class="topnav">
+    <a class="brand" href="#">
+      <div class="brand-icon">ดธ</div>
+      <div>
+        <div style="font-size:13px;font-weight:600">ศูนย์ดำรงธรรม</div>
+        <div style="font-size:10px;color:var(--gray-500);font-weight:400">จังหวัดภูเก็ต</div>
+      </div>
+    </a>
+    <div class="nav-sep"></div>
+    <button class="nav-btn solid" onclick="goPage('page-admin')">เข้าสู่ระบบเจ้าหน้าที่</button>
+  </nav>
+
+  <div class="public-hero">
+    <div class="hero-badge">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block"></span>
+      บริการออนไลน์
+    </div>
+    <div class="hero-title">ตรวจสอบสถานะเรื่องร้องเรียน</div>
+    <div class="hero-sub">กรอกเลขบัตรประชาชนของท่านเพื่อดูความคืบหน้าของเรื่องที่ได้ยื่นไว้</div>
+
+    <div class="search-card">
+      <div class="field-label">เลขบัตรประชาชน</div>
+      <div class="field-row">
+        <input id="cid-input" class="input-text" type="text" placeholder="กรอกเลข 13 หลัก" maxlength="13" inputmode="numeric"
+          onkeydown="if(event.key==='Enter')searchCase()">
+        <button class="btn-search" onclick="searchCase()">ค้นหา</button>
+      </div>
+      <div class="helper-text">ข้อมูลเลขบัตรประชาชนของท่านจะถูกใช้เพื่อตรวจสอบสถานะเท่านั้น</div>
+
+      <div id="result-area" class="result-area">
+        <div id="no-result" class="no-result">ไม่พบข้อมูลสำหรับเลขบัตรประชาชนนี้</div>
+        <div id="result-card" class="result-case" style="display:none">
+          <div class="case-header">
+            <div>
+              <div class="case-id" id="r-code">DT-2568-0042</div>
+              <div class="case-date" id="r-date">วันที่ยื่น: 1 มีนาคม 2568</div>
+            </div>
+            <span class="badge badge-wip" id="r-badge">กำลังดำเนินการ</span>
+          </div>
+          <div class="case-body">
+            <div class="case-subject" id="r-subject">ปัญหาที่ดินทับซ้อนกับเพื่อนบ้าน บริเวณซอย 3 ต.เชิงทะเล อ.ถลาง</div>
+
+            <div class="timeline" id="r-timeline">
+              <!-- injected by JS -->
+            </div>
+
+            <div class="case-note" id="r-note">เจ้าหน้าที่นัดไกล่เกลี่ยในวันที่ 20 เมษายน 2568 เวลา 09:00 น. ณ ศูนย์ดำรงธรรมจังหวัดภูเก็ต</div>
+            <div class="case-officer" id="r-officer">ผู้รับผิดชอบ: นายสมชาย รักดี  ·  โทร. 076-123-456</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE: ADMIN — รับเรื่อง + รายการรอ
+═══════════════════════════════════════════ -->
+<div id="page-admin" class="page">
+  <nav class="topnav">
+    <a class="brand" href="#">
+      <div class="brand-icon">ดธ</div>
+      <div>
+        <div style="font-size:13px;font-weight:600">ระบบจัดการ — ศูนย์ดำรงธรรม</div>
+        <div style="font-size:10px;color:var(--gray-500)">จังหวัดภูเก็ต</div>
+      </div>
+    </a>
+    <div class="nav-sep"></div>
+    <button class="nav-btn ghost" onclick="goPage('page-dashboard')">Dashboard</button>
+    <button class="nav-btn ghost" onclick="goPage('page-public')">หน้าประชาชน</button>
+  </nav>
+
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">เมนู</div>
+      <div class="sidebar-item active"><span class="icon">＋</span>รับเรื่องใหม่</div>
+      <div class="sidebar-item"><span class="icon">☰</span>รายการทั้งหมด <span class="badge-count" id="menu-badge-total">0</span></div>
+      <div class="sidebar-item"><span class="icon">!</span>ยังไม่มอบหมาย <span class="badge-count" id="menu-badge-unassigned">0</span></div>
+      <div class="sidebar-item"><span class="icon">↗</span>มอบหมายงาน</div>
+      <div class="sidebar-section" style="margin-top:.5rem">รายงาน</div>
+      <div class="sidebar-item"><span class="icon">▤</span>สรุปรายเดือน</div>
+      <div class="sidebar-item"><span class="icon">⚙</span>ตั้งค่าระบบ</div>
+    </aside>
+
+    <main class="admin-main">
+      <div class="page-title">รับเรื่องร้องเรียนใหม่</div>
+      <div class="page-sub">กรอกข้อมูลผู้ร้องและรายละเอียดเรื่องให้ครบถ้วนก่อนบันทึก</div>
+
+      <!-- ฟอร์ม -->
+      <div class="form-card">
+        <div class="form-section-title">ข้อมูลผู้ร้องเรียน</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">ชื่อ-นามสกุล *</label>
+            <input id="req-name" class="form-input" type="text" placeholder="นายสมชาย ใจดี">
+          </div>
+          <div class="form-group">
+            <label class="form-label">เลขบัตรประชาชน *</label>
+            <input id="req-cid" class="form-input" type="text" placeholder="1234567890123" maxlength="13" inputmode="numeric">
+          </div>
+          <div class="form-group">
+            <label class="form-label">เบอร์โทรศัพท์ *</label>
+            <input id="req-phone" class="form-input" type="text" placeholder="08X-XXX-XXXX">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ประเภทเรื่อง</label>
+            <select id="req-type" class="form-select">
+              <option>ที่ดิน / ทรัพย์สิน</option>
+              <option>สิ่งแวดล้อม</option>
+              <option>สาธารณูปโภค</option>
+              <option>แรงงาน</option>
+              <option>ผู้บริโภค</option>
+              <option>อื่นๆ</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section-title">รายละเอียดเรื่อง</div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">เนื้อเรื่องโดยย่อ *</label>
+          <textarea id="req-desc" class="form-textarea" placeholder="อธิบายเรื่องที่ร้องเรียนโดยสรุป..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">ลิงก์เอกสารคำร้อง (Google Drive)</label>
+          <div class="drive-row">
+            <input id="req-drive" class="form-input" type="text" placeholder="https://drive.google.com/file/d/...">
+            <button class="btn-drive" onclick="openDrive()">เปิดเอกสาร ↗</button>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">มอบหมายให้</label>
+            <select id="req-assignee" class="form-select">
+              <option value="">— ยังไม่มอบหมาย —</option>
+              <option>นายสมชาย รักดี (ทนายความ)</option>
+              <option>นางสาวมาลี สุขใจ (เจ้าหน้าที่)</option>
+              <option>นายวิชัย ประดับ (เจ้าหน้าที่)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ระดับความเร่งด่วน</label>
+            <div class="urgency-row">
+              <button class="urgency-btn selected-normal" onclick="setUrgency(this,'normal')">ปกติ</button>
+              <button class="urgency-btn" onclick="setUrgency(this,'urgent')">🔴 เร่งด่วน</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section-title">ขั้นตอนปัจจุบัน</div>
+        <div class="step-select-row" id="step-row">
+          <!-- injected -->
+        </div>
+        <div style="margin-top:.75rem">
+          <label class="form-label">บันทึกเพิ่มเติม / หมายเหตุ</label>
+          <textarea id="req-note" class="form-textarea" style="min-height:56px" placeholder="บันทึกความเคลื่อนไหว เช่น วันนัด, ผลการตรวจสอบ..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button id="btn-save" class="btn-save" onclick="saveCase()">บันทึกรับเรื่อง</button>
+        <button class="btn-cancel" onclick="clearForm()">ล้างข้อมูล</button>
+      </div>
+
+      <!-- ตารางรอดำเนินการ -->
+      <div class="table-card" style="margin-top:2rem">
+        <div class="table-head">
+          <div class="table-head-title">รายการล่าสุด</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>รหัสเรื่อง</th>
+                <th>ชื่อผู้ร้อง</th>
+                <th>ประเภท</th>
+                <th>วันที่รับ</th>
+                <th>สถานะ</th>
+                <th>ดำเนินการ</th>
+              </tr>
+            </thead>
+            <tbody id="pending-tbody">
+              <!-- injected by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE: DASHBOARD
+═══════════════════════════════════════════ -->
+<div id="page-dashboard" class="page">
+  <nav class="topnav">
+    <a class="brand" href="#">
+      <div class="brand-icon">ดธ</div>
+      <div>
+        <div style="font-size:13px;font-weight:600">Dashboard — ศูนย์ดำรงธรรม</div>
+        <div style="font-size:10px;color:var(--gray-500)">จังหวัดภูเก็ต</div>
+      </div>
+    </a>
+    <div class="nav-sep"></div>
+    <button class="nav-btn ghost" onclick="goPage('page-admin')">หลังบ้านแอดมิน</button>
+    <button class="nav-btn ghost" onclick="goPage('page-public')">หน้าประชาชน</button>
+  </nav>
+
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-title">ภาพรวมระบบ</div>
+        <div style="font-size:12px;color:var(--gray-500)" id="dash-date">อัพเดตล่าสุด: กำลังโหลด...</div>
+      </div>
+      <select class="month-select">
+        <option>ข้อมูลทั้งหมด (All Time)</option>
+      </select>
+    </div>
+
+    <!-- Alert -->
+    <div class="alert-banner" id="dash-alert" style="display:none;">
+      <span class="alert-icon">⚠</span>
+      <div>
+        <div class="alert-text" id="dash-alert-text">มี 0 เรื่องที่ยังไม่ได้รับมอบหมาย</div>
+        <div class="alert-sub">กรุณาตรวจสอบและมอบหมายงาน</div>
+      </div>
+      <button class="btn-save" style="margin-left:auto;padding:6px 14px;font-size:12px" onclick="goPage('page-admin')">จัดการ →</button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stat-grid">
+      <div class="stat-card accent-green">
+        <div class="stat-label">รับเรื่องทั้งหมด</div>
+        <div class="stat-num green" id="stat-total">0</div>
+        <div class="stat-sub">เรื่องในระบบ</div>
+      </div>
+      <div class="stat-card accent-orange">
+        <div class="stat-label">ยังไม่มอบหมาย</div>
+        <div class="stat-num orange" id="stat-unassigned">0</div>
+        <div class="stat-sub">รอดำเนินการด่วน</div>
+      </div>
+      <div class="stat-card accent-amber">
+        <div class="stat-label">กำลังดำเนินการ</div>
+        <div class="stat-num amber" id="stat-wip">0</div>
+        <div class="stat-sub">อยู่ระหว่างดำเนินการ</div>
+      </div>
+      <div class="stat-card accent-gray">
+        <div class="stat-label">ปิดเรื่องแล้ว</div>
+        <div class="stat-num" id="stat-done">0</div>
+        <div class="stat-sub">เสร็จสิ้น</div>
+      </div>
+    </div>
+
+    <div class="dash-grid2">
+      <!-- Progress -->
+      <div class="dash-card">
+        <div class="dash-card-title">ความคืบหน้าตามขั้นตอน</div>
+        <div id="progress-rows"></div>
+      </div>
+      <!-- Staff workload -->
+      <div class="dash-card">
+        <div class="dash-card-title">งานตามผู้รับผิดชอบ</div>
+        <table>
+          <thead>
+            <tr>
+              <th>ชื่อเจ้าหน้าที่</th>
+              <th style="text-align:center">กำลังดูแล</th>
+              <th style="text-align:center">เสร็จแล้ว</th>
+            </tr>
+          </thead>
+          <tbody id="staff-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Stale cases -->
+    <div class="table-card">
+      <div class="table-head">
+        <div class="table-head-title">เรื่องที่ยังไม่เสร็จสิ้น (เรียงตามวันที่)</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>รหัส</th><th>ชื่อผู้ร้อง</th><th>ขั้นตอนปัจจุบัน</th><th>ผู้รับผิดชอบ</th><th>ดำเนินการ</th></tr>
+          </thead>
+          <tbody id="stale-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCRIPT — Firebase Integration
+═══════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+/* ====================================================================
+   ตั้งค่า FIREBASE CONFIG (นำข้อมูลจากโปรเจกต์ของคุณมาวางทับส่วนนี้)
+   เมื่อศูนย์ดำรงธรรมสมัครอีเมลใหม่ ให้นำ Config ของเขามาวางตรงนี้แทนครับ
+==================================================================== */
+let firebaseConfig = {
+  apiKey: "AIzaSyBJfcCyRIWjjBTK0kzWq7si-3Y1YkAEG38",
+  authDomain: "fir-crdrd.firebaseapp.com",
+  projectId: "fir-crdrd",
+  storageBucket: "fir-crdrd.firebasestorage.app",
+  messagingSenderId: "288478193935",
+  appId: "1:288478193935:web:34f5e7e7f5953ce6d9b67a",
+  measurementId: "G-T1TVB3MPPG"
+};
+
+// --- (ส่วนนี้สำหรับให้ระบบ Canvas รัน Preview ได้ - ไม่ต้องลบครับ) ---
+if (typeof __firebase_config !== 'undefined') {
+    firebaseConfig = JSON.parse(__firebase_config);
+}
+// ----------------------------------------------------------------
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'damrongdhama-phuket';
+
+// เราใช้ Path นี้เพื่อให้ประชาชนและแอดมินใช้งานข้อมูลชุดเดียวกันได้
+const complaintsRef = collection(db, 'artifacts', appId, 'public', 'data', 'complaints');
+
+/* ─── State & Data ─── */
+let currentUser = null;
+let allComplaints = []; // เก็บข้อมูลทั้งหมดไว้ใน Memory เพื่อค้นหาและทำ Dashboard
+
+const STEPS = [
+  { id:1, label:'รับเรื่อง', color:'#1D9E75' },
+  { id:2, label:'ตรวจสอบเบื้องต้น', color:'#1D9E75' },
+  { id:3, label:'นัดไกล่เกลี่ย', color:'#B86A00' },
+  { id:4, label:'แจ้งผล', color:'#B86A00' },
+  { id:5, label:'ปิดเรื่อง', color:'#3B6D11' }
+];
+
+let selectedStep = 1;
+let currentUrgency = 'normal';
+
+/* ─── 1. ระบบ Authentication (เข้าสู่ระบบแบบไม่ระบุตัวตน) ─── */
+async function initAuth() {
+    try {
+        await signInAnonymously(auth);
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                // เมื่อ Auth ผ่าน ให้เริ่มดึงข้อมูล (Real-time listener)
+                setupRealtimeListener();
+            }
+        });
+    } catch (error) {
+        console.error("Auth Error:", error);
+        showToast("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ");
+    }
+}
+
+/* ─── 2. ระบบ Real-time ดึงข้อมูลจากฐานข้อมูล ─── */
+function setupRealtimeListener() {
+    if (!currentUser) return;
+    
+    onSnapshot(complaintsRef, (snapshot) => {
+        allComplaints = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
+        // อัปเดตหน้าจอทั้งหมดเมื่อมีข้อมูลใหม่
+        renderPendingTable();
+        renderDashboard();
+    }, (error) => {
+        console.error("Snapshot error:", error);
+    });
+}
+
+/* ─── 3. ระบบแอดมิน - บันทึกข้อมูล ─── */
+window.saveCase = async () => {
+    if (!currentUser) return showToast("ระบบยังไม่พร้อม กรุณารอสักครู่");
+
+    const name = document.getElementById('req-name').value.trim();
+    const cid = document.getElementById('req-cid').value.trim();
+    const phone = document.getElementById('req-phone').value.trim();
+    const type = document.getElementById('req-type').value;
+    const desc = document.getElementById('req-desc').value.trim();
+    const drive = document.getElementById('req-drive').value.trim();
+    const assignee = document.getElementById('req-assignee').value;
+    const note = document.getElementById('req-note').value.trim();
+
+    if (!name || !cid || !desc) {
+        return showToast("กรุณากรอก ชื่อ, เลข ปชช. และ เนื้อเรื่อง ให้ครบถ้วน");
+    }
+
+    const btn = document.getElementById('btn-save');
+    btn.disabled = true;
+    btn.textContent = "กำลังบันทึก...";
+
+    // สร้างรหัสเคส (จำลอง)
+    const year = new Date().getFullYear() + 543;
+    const runningNo = String(allComplaints.length + 1).padStart(4, '0');
+    const caseCode = `DT-${year}-${runningNo}`;
+    
+    // จัดการสถานะ
+    let status = 'new';
+    if (selectedStep === 5) status = 'done';
+    else if (assignee !== '') status = 'wip';
+
+    const newCase = {
+        code: caseCode,
+        citizenId: cid,
+        citizenName: name,
+        phone: phone,
+        type: type,
+        description: desc,
+        driveLink: drive,
+        assignee: assignee,
+        urgency: currentUrgency,
+        currentStep: selectedStep,
+        note: note,
+        status: status,
+        createdAt: new Date().toISOString(), // ใช้ ISO เพื่อให้เรียงง่าย
+        timestamp: serverTimestamp() // สำหรับฐานข้อมูล
+    };
+
+    try {
+        await addDoc(complaintsRef, newCase);
+        showToast(`บันทึกเรื่องร้องเรียน ${caseCode} สำเร็จ ✓`);
+        window.clearForm();
+    } catch (error) {
+        console.error("Save Error:", error);
+        showToast("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "บันทึกรับเรื่อง";
+    }
+};
+
+/* ─── 4. ระบบประชาชน - ค้นหาข้อมูล ─── */
+window.searchCase = () => {
+    const cid = document.getElementById('cid-input').value.trim();
+    const area = document.getElementById('result-area');
+    const card = document.getElementById('result-card');
+    const noRes = document.getElementById('no-result');
+    
+    area.style.display = 'block';
+    card.style.display = 'none';
+    noRes.style.display = 'none';
+    
+    if (!cid) return;
+
+    // ค้นหาใน Memory
+    const foundCase = allComplaints.find(c => c.citizenId === cid);
+    
+    if (!foundCase) {
+        noRes.style.display = 'block';
+        return;
+    }
+
+    // แปลงวันที่ให้อ่านง่าย
+    const dateObj = new Date(foundCase.createdAt);
+    const thaiDate = `${dateObj.getDate()} / ${dateObj.getMonth() + 1} / ${dateObj.getFullYear() + 543}`;
+
+    // แสดงผลข้อมูล
+    document.getElementById('r-code').textContent = foundCase.code;
+    document.getElementById('r-date').textContent = 'วันที่ยื่น: ' + thaiDate;
+    document.getElementById('r-subject').textContent = foundCase.description.substring(0, 80) + (foundCase.description.length > 80 ? '...' : '');
+    
+    // หมายเหตุ และ เจ้าหน้าที่
+    document.getElementById('r-note').textContent = foundCase.note || 'ไม่มีบันทึกเพิ่มเติม';
+    const officerName = foundCase.assignee || 'อยู่ระหว่างมอบหมาย';
+    document.getElementById('r-officer').textContent = `ผู้รับผิดชอบ: ${officerName}`;
+    
+    // สถานะ Badge
+    const badgeEl = document.getElementById('r-badge');
+    if (foundCase.status === 'done') { 
+        badgeEl.className = 'badge badge-done'; badgeEl.textContent = 'ปิดเรื่องแล้ว'; 
+    } else if (foundCase.status === 'new') {
+        badgeEl.className = 'badge badge-new'; badgeEl.textContent = 'รับเรื่องใหม่';
+    } else { 
+        badgeEl.className = 'badge badge-wip'; badgeEl.textContent = 'กำลังดำเนินการ'; 
+    }
+    
+    // ไทม์ไลน์
+    const tl = document.getElementById('r-timeline');
+    tl.innerHTML = STEPS.map(s => {
+        const cls = s.id < foundCase.currentStep ? 'done' : s.id === foundCase.currentStep ? 'current' : '';
+        const dot = s.id < foundCase.currentStep ? '✓' : s.id;
+        return `<div class="tl-step ${cls}"><div class="tl-dot">${dot}</div><div class="tl-name">${s.label}</div></div>`;
+    }).join('');
+
+    card.style.display = 'block';
+};
+
+/* ─── Rendering UI ─── */
+
+function renderPendingTable() {
+    // เรียงจากใหม่ไปเก่า
+    const sorted = [...allComplaints].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    const badgeMap = { new:'badge-new', urgent:'badge-urgent', wip:'badge-wip', done:'badge-done' };
+    const labelMap = { new:'ใหม่', urgent:'เร่งด่วน', wip:'ดำเนินการ', done:'ปิดเรื่อง' };
+    
+    document.getElementById('pending-tbody').innerHTML = sorted.slice(0, 10).map(r => {
+        // ประเมิน Badge คร่าวๆ
+        let b = 'new';
+        if(r.status === 'done') b = 'done';
+        else if (r.urgency === 'urgent' && r.status !== 'done') b = 'urgent';
+        else if (r.status === 'wip') b = 'wip';
+        
+        const d = new Date(r.createdAt);
+        const dateStr = `${d.getDate()}/${d.getMonth()+1}/${(d.getFullYear()+543).toString().slice(2)}`;
+
+        return `<tr>
+          <td><span class="td-muted">${r.code}</span></td>
+          <td>${r.citizenName}</td>
+          <td><span style="font-size:11px;background:var(--gray-100);padding:2px 8px;border-radius:4px;color:var(--gray-700)">${r.type}</span></td>
+          <td><span class="td-muted">${dateStr}</span></td>
+          <td><span class="badge ${badgeMap[b]}">${labelMap[b]}</span></td>
+          <td><button class="btn-assign" onclick="window.showToast('รอเปิดหน้ารายละเอียด')">ดูข้อมูล</button></td>
+        </tr>`;
+    }).join('');
+    
+    if(sorted.length === 0) {
+        document.getElementById('pending-tbody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:#888;">ยังไม่มีข้อมูล</td></tr>`;
+    }
+}
+
+function renderDashboard() {
+    document.getElementById('dash-date').textContent = 'อัพเดตล่าสุด: ' + new Date().toLocaleString('th-TH');
+
+    const total = allComplaints.length;
+    const unassigned = allComplaints.filter(c => c.assignee === '' && c.status !== 'done').length;
+    const wip = allComplaints.filter(c => c.status === 'wip').length;
+    const done = allComplaints.filter(c => c.status === 'done').length;
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-unassigned').textContent = unassigned;
+    document.getElementById('stat-wip').textContent = wip;
+    document.getElementById('stat-done').textContent = done;
+    
+    document.getElementById('menu-badge-total').textContent = total;
+    document.getElementById('menu-badge-unassigned').textContent = unassigned;
+
+    // Alert
+    const alertBox = document.getElementById('dash-alert');
+    if (unassigned > 0) {
+        alertBox.style.display = 'flex';
+        document.getElementById('dash-alert-text').textContent = `มี ${unassigned} เรื่องที่ยังไม่ได้รับมอบหมาย`;
+    } else {
+        alertBox.style.display = 'none';
+    }
+
+    // Progress Bars
+    const stepCounts = [0,0,0,0,0];
+    allComplaints.forEach(c => {
+        if(c.currentStep >= 1 && c.currentStep <= 5) stepCounts[c.currentStep - 1]++;
+    });
+    
+    document.getElementById('progress-rows').innerHTML = STEPS.map((s, index) => {
+        const count = stepCounts[index];
+        const pct = total === 0 ? 0 : Math.round((count / total) * 100);
+        return `<div class="progress-row">
+          <div class="progress-info"><span>ขั้น ${s.id} — ${s.label}</span><span class="progress-count">${count} เรื่อง</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${s.color}"></div></div>
+        </div>`;
+    }).join('');
+
+    // Staff Workload
+    const staffMap = {};
+    allComplaints.forEach(c => {
+        if (!c.assignee) return;
+        if (!staffMap[c.assignee]) staffMap[c.assignee] = { active: 0, done: 0 };
+        if (c.status === 'done') staffMap[c.assignee].done++;
+        else staffMap[c.assignee].active++;
+    });
+
+    document.getElementById('staff-tbody').innerHTML = Object.keys(staffMap).map(name => `
+        <tr>
+          <td>${name}</td>
+          <td style="text-align:center">${staffMap[name].active}</td>
+          <td style="text-align:center;color:var(--green)">${staffMap[name].done}</td>
+        </tr>`).join('');
+        
+    if(Object.keys(staffMap).length === 0) {
+         document.getElementById('staff-tbody').innerHTML = `<tr><td colspan="3" style="text-align:center;color:#888;">ยังไม่มีการมอบหมายงาน</td></tr>`;
+    }
+
+    // Stale Cases (ยังไม่เสร็จ)
+    const notDone = allComplaints.filter(c => c.status !== 'done').sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+    document.getElementById('stale-tbody').innerHTML = notDone.slice(0, 5).map(s => {
+        const stepName = STEPS.find(st => st.id === s.currentStep)?.label || `ขั้น ${s.currentStep}`;
+        return `<tr>
+          <td class="td-muted">${s.code}</td>
+          <td>${s.citizenName}</td>
+          <td><span style="font-size:11px;background:var(--gray-100);padding:2px 8px;border-radius:4px">${stepName}</span></td>
+          <td class="td-muted">${s.assignee || '-'}</td>
+          <td><button class="btn-follow" onclick="window.showToast('ระบบติดตามยังไม่เปิดใช้งาน')">ติดตาม</button></td>
+        </tr>`;
+    }).join('');
+    
+    if(notDone.length === 0) {
+        document.getElementById('stale-tbody').innerHTML = `<tr><td colspan="5" style="text-align:center;color:#888;">ไม่มีเรื่องค้าง</td></tr>`;
+    }
+}
+
+/* ─── UI Helpers ─── */
+window.goPage = (id) => {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+window.buildStepRow = () => {
+  const row = document.getElementById('step-row');
+  row.innerHTML = STEPS.map(s =>
+    `<button class="step-option${s.id===1?' active':''}" onclick="selectStep(this,${s.id})">${s.id}. ${s.label}</button>`
+  ).join('');
+}
+
+window.selectStep = (el, id) => {
+  document.querySelectorAll('.step-option').forEach(b => b.classList.remove('active'));
+  el.classList.add('active'); 
+  selectedStep = id;
+}
+
+window.setUrgency = (el, type) => {
+  document.querySelectorAll('.urgency-btn').forEach(b => { b.classList.remove('selected-normal','selected-urgent'); });
+  el.classList.add(type === 'urgent' ? 'selected-urgent' : 'selected-normal');
+  currentUrgency = type;
+}
+
+window.openDrive = () => {
+  const url = document.getElementById('req-drive').value.trim();
+  if (url) window.open(url, '_blank');
+  else window.showToast('กรุณากรอกลิงก์ Google Drive ก่อน');
+}
+
+window.showToast = (msg) => {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+window.clearForm = () => {
+    document.getElementById('req-name').value = '';
+    document.getElementById('req-cid').value = '';
+    document.getElementById('req-phone').value = '';
+    document.getElementById('req-desc').value = '';
+    document.getElementById('req-drive').value = '';
+    document.getElementById('req-assignee').value = '';
+    document.getElementById('req-note').value = '';
+    selectedStep = 1;
+    currentUrgency = 'normal';
+    window.buildStepRow(); // รีเซ็ตปุ่ม step
+    
+    const urgBtns = document.querySelectorAll('.urgency-btn');
+    urgBtns[0].classList.add('selected-normal');
+    urgBtns[1].classList.remove('selected-urgent');
+}
+
+/* ─── Init ─── */
+window.buildStepRow();
+initAuth(); // เริ่มต้นการเชื่อมต่อ Firebase ทันทีที่โหลดหน้าเว็บ
+</script>
+</body>
+</html>
