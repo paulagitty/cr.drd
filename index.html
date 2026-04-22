@@ -406,7 +406,7 @@ tr:hover td { background: var(--gray-50); }
   padding-bottom: 15px;
 }
 .history-item:last-child {
-  border-left: 2px solid transparent; /* Hide border for last item */
+  border-left: 2px solid transparent;
 }
 .history-item::before {
   content: ''; position: absolute; left: -7px; top: 2px;
@@ -469,7 +469,6 @@ tr:hover td { background: var(--gray-50); }
   
   .print-history { border-left: 2px solid #ccc; margin-left: 5px; padding-left: 15px; }
   
-  /* ป้องกันการถูกตัดครึ่งหน้าสำหรับแต่ละข้อประวัติ */
   .print-history-item { margin-bottom: 15px; page-break-inside: avoid; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
   .print-history-item:last-child { border-bottom: none; }
   
@@ -635,11 +634,12 @@ const sidebarHTML = `
           <div class="form-group">
             <label class="form-label">ประเภทเรื่อง</label>
             <select id="req-type" class="form-select" onchange="toggleTypeOther()">
-              <option>ที่ดิน / ทรัพย์สิน</option>
-              <option>สิ่งแวดล้อม</option>
-              <option>สาธารณูปโภค</option>
-              <option>แรงงาน</option>
-              <option>ผู้บริโภค</option>
+              <option>แจ้งเบาะแสการกระทำความผิด</option>
+              <option>ปัญหาความเดือดร้อนรำคาญ</option>
+              <option>ร้องเรียนหน่วยงานและเจ้าหน้าที่รัฐ</option>
+              <option>ปัญหาที่ดิน</option>
+              <option>การขอความช่วยเหลือ</option>
+              <option>เรื่องทั่วไป</option>
               <option value="other">อื่นๆ (โปรดระบุ)</option>
             </select>
             <!-- ช่องสำหรับพิมพ์กรณีเลือก อื่นๆ -->
@@ -666,7 +666,6 @@ const sidebarHTML = `
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label">มอบหมายให้เจ้าหน้าที่</label>
-            <!-- ใช้ Datalist เพื่อให้เลือกหรือพิมพ์ใหม่ได้ -->
             <input list="officers-list" id="req-assignee" class="form-input" placeholder="เลือกหรือพิมพ์ชื่อเจ้าหน้าที่..." oninput="autoFillOfficerPhone()">
             <datalist id="officers-list">
               <option value="นายสมชาย รักดี (ทนายความ)">
@@ -818,7 +817,7 @@ const sidebarHTML = `
         </div>
       </div>
 
-      <!-- Stale cases (All cases shown in dashboard for easy access) -->
+      <!-- Stale cases -->
       <div class="table-card">
         <div class="table-head">
           <div class="table-head-title">รายการทั้งหมด (เรียงตามวันที่)</div>
@@ -906,22 +905,24 @@ const sidebarHTML = `
       
       <div class="form-card">
         <div class="form-section-title">เครื่องมือสำหรับนักพัฒนา</div>
+        
         <p style="font-size: 13px; color: var(--gray-700); margin-bottom: 1rem;">
-          ปุ่มด้านล่างนี้จะทำการสร้างเรื่องร้องเรียนจำลองจำนวน 20 เคส เข้าสู่ฐานข้อมูล Firebase ของคุณอัตโนมัติ <br>
-          <strong style="color:var(--green)">* เวอร์ชันนี้: ข้อมูลจำลองจะถูกสร้างให้มี "ประวัติย้อนหลัง (Timeline)" ครบทุกขั้นตอนเพื่อทดสอบการพิมพ์เอกสารอย่างสมจริง</strong>
+          หากมีข้อมูลเก่าค้างอยู่ในระบบ คุณสามารถกดปุ่มด้านล่างนี้เพื่อล้างข้อมูลทั้งหมดทิ้งได้ทันที
+        </p>
+        <button id="btn-clear-db" class="btn-cancel" style="color: var(--red); border-color: var(--red-light); background: var(--red-light); margin-bottom: 1.5rem;" onclick="clearAllData()">
+          🗑️ ลบข้อมูลทั้งหมดในระบบ (Reset Database)
+        </button>
+        
+        <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
+
+        <p style="font-size: 13px; color: var(--gray-700); margin-bottom: 1rem;">
+          ปุ่มด้านล่างนี้จะสร้างเรื่องร้องเรียนจำลองจำนวน 20 เคส เข้าสู่ฐานข้อมูล Firebase ของคุณอัตโนมัติ <br>
+          <strong style="color:var(--green)">* ข้อมูลจำลองจะถูกสร้างให้มี "ประวัติย้อนหลัง" ครบทุกขั้นตอนเพื่อทดสอบการพิมพ์หน้า A4 แบบสมจริง</strong>
         </p>
         <button id="btn-gen-mock" class="btn-save" style="background: var(--orange);" onclick="generateMockData()">
           ⚡ สร้างข้อมูลจำลอง 20 เคส (พร้อมประวัติแบบละเอียด)
         </button>
-        
-        <!-- เพิ่มปุ่มล้างข้อมูลทั้งหมด -->
-        <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
-        <p style="font-size: 13px; color: var(--gray-700); margin-bottom: 1rem;">
-          หากมีข้อมูลขยะค้างอยู่ในระบบจำนวนมาก คุณสามารถกดปุ่มด้านล่างนี้เพื่อล้างข้อมูลทั้งหมดในฐานข้อมูลทิ้งได้ทันที
-        </p>
-        <button id="btn-clear-db" class="btn-cancel" style="color: var(--red); border-color: var(--red-light); background: var(--red-light);" onclick="clearAllData()">
-          🗑️ ลบข้อมูลทั้งหมดในระบบ (Reset Database)
-        </button>
+
       </div>
     </main>
   </div>
@@ -1194,7 +1195,7 @@ window.saveCase = async () => {
     const initialHistory = [{
         date: new Date().toISOString(),
         step: selectedStep,
-        note: note || "รับเรื่องร้องเรียนเข้าสู่ระบบ พร้อมตรวจสอบรายละเอียดคำร้อง",
+        note: note || "รับเรื่องร้องเรียนเข้าสู่ระบบ พร้อมตรวจสอบรายละเอียดคำร้องเบื้องต้นเรียบร้อยแล้ว",
         officer: assignee || "แอดมินระบบ"
     }];
 
@@ -1230,16 +1231,13 @@ window.updateCaseDetails = async () => {
     
     if (!newNote) return window.showToast("กรุณากรอกบันทึกการดำเนินการ (Log) ด้วยครับ เพื่อเก็บเป็นประวัติ");
 
-    // ดึงประวัติเดิมมาเพื่อเพิ่มต่อท้าย
     const existingCase = allComplaints.find(x => x.id === docId);
     let newHistory = existingCase.history ? [...existingCase.history] : [];
     
-    // ดึงค่า note เก่า (เผื่อระบบเก่าที่ยังไม่มีประวัติ)
     if (existingCase.note && newHistory.length === 0) {
         newHistory.push({ date: existingCase.createdAt, step: existingCase.currentStep, note: existingCase.note, officer: existingCase.assignee || 'แอดมินระบบ' });
     }
     
-    // เพิ่มประวัติใหม่
     newHistory.push({
         date: new Date().toISOString(),
         step: newStep,
@@ -1263,7 +1261,7 @@ window.updateCaseDetails = async () => {
             assignee: newAssignee,
             assigneePhone: assigneePhone,
             currentStep: newStep,
-            history: newHistory, // บันทึกประวัติชุดใหม่เข้าไปแทนที่
+            history: newHistory,
             status: newStatus
         });
         window.showToast("อัปเดตความคืบหน้าและประวัติสำเร็จ ✓");
@@ -1309,7 +1307,6 @@ window.clearAllData = async () => {
     btn.disabled = true; btn.textContent = "กำลังล้างข้อมูลทั้งหมด...";
 
     try {
-        // ดึงข้อมูลทั้งหมดมาลบทีละอัน
         const querySnapshot = await getDocs(complaintsRef);
         const deletePromises = [];
         querySnapshot.forEach((docSnap) => {
@@ -1333,7 +1330,17 @@ window.generateMockData = async () => {
     btn.disabled = true; btn.textContent = "กำลังสร้าง กรุณารอสักครู่...";
 
     const mockNames = ["นายอนุชา ดีงาม", "นางประนอม ใจงาม", "นายสมศักดิ์ รักษ์ดี", "นางวิไลวรรณ จันทร์เรือง", "นายกิตติศักดิ์ ทองดี"];
-    const mockTypes = ["ที่ดิน / ทรัพย์สิน", "สิ่งแวดล้อม", "สาธารณูปโภค", "แรงงาน", "ผู้บริโภค"];
+    
+    // อัปเดตประเภทการร้องเรียนใหม่ ตามที่คุณผู้ใช้ชี้แจง
+    const mockTypes = [
+        "แจ้งเบาะแสการกระทำความผิด", 
+        "ปัญหาความเดือดร้อนรำคาญ", 
+        "ร้องเรียนหน่วยงานและเจ้าหน้าที่รัฐ", 
+        "ปัญหาที่ดิน", 
+        "การขอความช่วยเหลือ", 
+        "เรื่องทั่วไป"
+    ];
+    
     const officerKeys = Object.keys(knownOfficers);
 
     try {
@@ -1352,7 +1359,7 @@ window.generateMockData = async () => {
             const pastDate = new Date();
             pastDate.setDate(pastDate.getDate() - Math.floor(Math.random() * 60));
 
-            // สร้าง History ตั้งแต่ขั้นตอนที่ 1 ไปจนถึง finalStep โดยจำลองข้อความที่สมจริงมากๆ
+            // สร้าง History ตั้งแต่ขั้นตอนที่ 1 ไปจนถึง finalStep โดยจำลองข้อความที่สมจริง
             let mockHistory = [];
             let currDate = new Date(pastDate);
 
@@ -1379,7 +1386,7 @@ window.generateMockData = async () => {
             const newCase = {
                 code: caseCode, citizenId: cid, citizenName: mockNames[i % mockNames.length] + " (จำลอง)",
                 phone: "08" + Math.floor(Math.random()*100000000).toString().padStart(8, '0'),
-                type: mockTypes[i % mockTypes.length],
+                type: mockTypes[i % mockTypes.length], 
                 description: "ข้อร้องเรียนจำลองลำดับที่ " + i + " เพื่อทดสอบระบบหน้า Dashboard และการปริ้นรายงานที่มีข้อความอธิบายยาวๆ\n\nผู้ร้องขอความช่วยเหลือให้ติดตามการดำเนินงานของหน่วยงานที่เกี่ยวข้องอย่างใกล้ชิด เนื่องจากได้รับผลกระทบเป็นเวลานาน",
                 driveLink: "", assignee: assigneeName, assigneePhone: assigneePhone,
                 urgency: Math.random() > 0.8 ? "urgent" : "normal", currentStep: finalStep,
@@ -1418,7 +1425,6 @@ window.searchCase = () => {
     document.getElementById('r-date').textContent = 'วันที่ยื่น: ' + thaiDate;
     document.getElementById('r-subject').textContent = foundCase.description.substring(0, 80) + (foundCase.description.length > 80 ? '...' : '');
     
-    // ดึงโน้ตล่าสุดมาแสดงให้ประชาชนเห็น
     let latestNote = "กำลังดำเนินการตามขั้นตอน";
     if (foundCase.history && foundCase.history.length > 0) {
         const sortedHis = [...foundCase.history].sort((a,b) => new Date(b.date) - new Date(a.date));
@@ -1452,7 +1458,6 @@ window.openCaseDetails = (docId) => {
     const c = allComplaints.find(x => x.id === docId);
     if(!c) return window.showToast('ไม่พบข้อมูล');
 
-    // ข้อมูลทั่วไป
     document.getElementById('m-docId').value = docId;
     document.getElementById('m-code').textContent = c.code;
     document.getElementById('m-name').textContent = c.citizenName;
@@ -1467,7 +1472,6 @@ window.openCaseDetails = (docId) => {
     if(c.driveLink) driveDiv.innerHTML = `<button class="btn-drive" onclick="window.open('${c.driveLink}', '_blank')">เปิดเอกสารแนบ (Drive) ↗</button>`;
     else driveDiv.innerHTML = `<span style="font-size:12px;color:var(--gray-500)">ไม่มีเอกสารแนบ</span>`;
 
-    // อัปเดตส่วน History (Timeline)
     const hisDiv = document.getElementById('m-history-list');
     let historyData = c.history ? [...c.history] : [];
     
@@ -1476,8 +1480,7 @@ window.openCaseDetails = (docId) => {
     }
 
     if (historyData.length > 0) {
-        // เรียงจากใหม่ไปเก่า (ล่าสุดอยู่บนสุด) สำหรับหน้าจอ Modal จะได้ไม่ต้องเลื่อนหา
-        historyData.sort((a,b) => new Date(b.date) - new Date(a.date));
+        historyData.sort((a,b) => new Date(b.date) - new Date(a.date)); // เรียงใหม่ให้อันล่าสุดอยู่บน
         hisDiv.innerHTML = historyData.map(h => {
             const hd = new Date(h.date);
             const dateStr = `${hd.getDate()}/${hd.getMonth()+1}/${hd.getFullYear()+543} เวลา ${String(hd.getHours()).padStart(2,'0')}:${String(hd.getMinutes()).padStart(2,'0')} น.`;
@@ -1496,7 +1499,6 @@ window.openCaseDetails = (docId) => {
         hisDiv.innerHTML = `<span style="font-size:13px; color:var(--gray-500)">ยังไม่มีประวัติการดำเนินการ</span>`;
     }
 
-    // เตรียมฟอร์มอัปเดตใหม่
     document.getElementById('m-assignee').value = c.assignee || "";
     document.getElementById('m-step').value = c.currentStep;
     document.getElementById('m-note').value = ""; 
@@ -1514,7 +1516,6 @@ window.printCase = () => {
     const c = allComplaints.find(x => x.id === docId);
     if(!c) return;
 
-    // เติมข้อมูลลงในแบบฟอร์มปริ้น
     const d = new Date(c.createdAt);
     document.getElementById('p-code').textContent = c.code;
     document.getElementById('p-date').textContent = `${d.getDate()} / ${d.getMonth()+1} / ${d.getFullYear()+543}`;
@@ -1531,8 +1532,7 @@ window.printCase = () => {
     }
 
     if (historyData.length > 0) {
-        // เรียงจากเก่าไปใหม่ (บนลงล่าง) สำหรับหน้ากระดาษ Print เพื่อให้อ่านเนื้อเรื่องปะติดปะต่อกัน
-        historyData.sort((a,b) => new Date(a.date) - new Date(b.date));
+        historyData.sort((a,b) => new Date(a.date) - new Date(b.date)); // เรียงเก่าไปใหม่ (อ่านง่ายบนกระดาษ)
         pHisList.innerHTML = historyData.map(h => {
             const hd = new Date(h.date);
             const dateStr = `${hd.getDate()}/${hd.getMonth()+1}/${hd.getFullYear()+543} (${String(hd.getHours()).padStart(2,'0')}:${String(hd.getMinutes()).padStart(2,'0')} น.)`;
@@ -1547,7 +1547,6 @@ window.printCase = () => {
         pHisList.innerHTML = `<span style="font-size:13px; color:#666;">ยังไม่มีประวัติการดำเนินการ</span>`;
     }
 
-    // สั่งปริ้น
     window.print();
 };
 
